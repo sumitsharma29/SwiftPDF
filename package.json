@@ -1,0 +1,15 @@
+{
+    "name": "pdf-converter-root",
+    "version": "1.0.0",
+    "description": "Root scripts for PDF Converter",
+    "scripts": {
+        "dev:frontend": "cd frontend && npm run dev",
+        "dev:backend": "python -m uvicorn backend.main:app --reload",
+        "build:frontend": "cd frontend && npm run build",
+        "start:frontend": "cd frontend && npm start",
+        "docker:up": "docker-compose up --build",
+        "docker:down": "docker-compose down"
+    },
+    "author": "",
+    "license": "ISC"
+}
