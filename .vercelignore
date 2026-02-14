@@ -1,0 +1,38 @@
+# Vercel ignore patterns
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Test files
+test_*.py
+tests/
+*.pdf
+*.jpg
+*.jpeg
+*.png
+
+# Local development
+.vscode/
+.git/
+temp/
+backend/tests/
+backend/__pycache__/
+
+# Backend files (not needed for deployment)
+backend/Dockerfile
+backend/.dockerignore
+backend/start_backend.bat
+start_backend_root.bat
+docker-compose.yml
+check_poppler.py
+reproduce_issue.py
+test_all_features.py
+test_pymupdf.py
