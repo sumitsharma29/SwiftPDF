@@ -27,39 +27,33 @@ Both deployments will use the **SAME** GitHub repository.
 
 ---
 
-## Step 2: Deploy Frontend to Vercel
+## Step 2: Deploy Frontend to Netlify
 
-1.  Log in to **Vercel**.
-2.  Click **Add New...** -> **Project**.
-3.  Import your GitHub repository.
-4.  **Configure Project**:
-    -   **Root Directory**: Click `Edit` and select `frontend`.
-    -   **Framework Preset**: Next.js (should be auto-detected).
-    -   **Environment Variables**:
-        -   Name: `NEXT_PUBLIC_API_URL`
-        -   Value: `https://swiftpdf-backend-xxxx.onrender.com` (Paste the URL from Step 1).
-        -   *Note*: Ensure you **REMOVE** any trailing slash `/` from the URL.
-5.  Click **Deploy**.
+1.  Log in to **Netlify**: [https://app.netlify.com](https://app.netlify.com)
+2.  Click **Add new site** -> **Import from an existing project**.
+3.  Connect **GitHub** and select your `SwiftPDF` repository.
+4.  **Configure Site**:
+    -   **Base directory**: `frontend`
+    -   **Build command**: `npm run build`
+    -   **Publish directory**: `.next`
+    -   **Netlify will detect `netlify.toml`**: This should pre-fill most settings.
+5.  **Environment Variables**:
+    -   Click **Add environment variables**.
+    -   Key: `NEXT_PUBLIC_API_URL`
+    -   Value: `https://swiftpdf-backend-m3ap.onrender.com`
+6.  Click **Deploy swiftpdf**.
 
 ---
 
-## Step 3: Connect Frontend to Backend
+## Step 3: Verify Connection
 
-Failed to connect? Check these common issues:
-
-1.  **CORS**: ensure your Backend allows the Vercel Frontend URL.
-    -   In Render, go to your `swiftpdf-backend` service -> **Environment**.
-    -   Add/Edit `ALLOWED_ORIGINS`.
-    -   Value: `https://your-vercel-project.vercel.app` (The URL Vercel gave you).
-    -   Redeploy the backend if you changed this.
-
-2.  **API Proxy**:
-    -   The `vercel.json` file is configured to proxy requests from `/api/*` to your backend if you prefer to use relative paths in your code.
-    -   However, setting `NEXT_PUBLIC_API_URL` is the robust way to ensure the frontend knows where to talk.
+The `netlify.toml` file includes a rewrite rule:
+-   It sends any request to `/api/*` on your frontend directly to your Render backend.
+-   This avoids CORS issues and keeps your API secure.
 
 ---
 
 ## Summary of URLs
 
--   **Frontend**: `https://your-project.vercel.app` (User visits this)
--   **Backend**: `https://swiftpdf-backend-xxxx.onrender.com` (API requests go here)
+-   **Frontend**: `https://your-site-name.netlify.app`
+-   **Backend**: `https://swiftpdf-backend-m3ap.onrender.com`

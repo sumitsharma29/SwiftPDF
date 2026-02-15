@@ -1,0 +1,14 @@
+[build]
+  base = "frontend"
+  publish = ".next"
+  command = "npm run build"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Proxy API requests to Render Backend
+[[redirects]]
+  from = "/api/*"
+  to = "https://swiftpdf-backend-m3ap.onrender.com/api/:splat"
+  status = 200
+  force = true
