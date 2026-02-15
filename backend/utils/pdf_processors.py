@@ -1,11 +1,6 @@
 import os
 from typing import List
 from pypdf import PdfReader, PdfWriter
-import img2pdf
-import fitz  # PyMuPDF
-import pikepdf
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
 
 class PDFProcessors:
     """
@@ -70,6 +65,7 @@ class PDFProcessors:
 
     @staticmethod
     def images_to_pdf(image_paths: List[str], output_path: str):
+        import img2pdf
         # input: list of image paths
         # output: single pdf path
         with open(output_path, "wb") as f:
@@ -77,6 +73,7 @@ class PDFProcessors:
 
     @staticmethod
     def pdf_to_images(file_path: str, output_folder: str):
+        import fitz  # PyMuPDF
         # Returns list of paths to generated images
         # Uses PyMuPDF (fitz) which doesn't require system poppler
         doc = fitz.open(file_path)
@@ -95,6 +92,7 @@ class PDFProcessors:
 
     @staticmethod
     def compress_pdf(file_path: str, output_path: str, level: str):
+        import pikepdf
         # Use pikepdf for better compression
         try:
             with pikepdf.open(file_path) as pdf:
@@ -120,6 +118,7 @@ class PDFProcessors:
 
     @staticmethod
     def lock_pdf(file_path: str, output_path: str, password: str):
+        import pikepdf
         with pikepdf.Pdf.open(file_path) as pdf:
             pdf.save(output_path, encryption=pikepdf.Encryption(
                 user=password, owner=password, R=6
@@ -127,6 +126,7 @@ class PDFProcessors:
 
     @staticmethod
     def unlock_pdf(file_path: str, output_path: str, password: str):
+        import pikepdf
         try:
             with pikepdf.Pdf.open(file_path, password=password) as pdf:
                 pdf.save(output_path)
@@ -135,6 +135,8 @@ class PDFProcessors:
 
     @staticmethod
     def watermark_pdf(file_path: str, output_path: str, watermark_text: str, output_folder: str):
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.pagesizes import letter
         # 1. Create watermark PDF
         # TODO: Get actual page size from input PDF for better placement
         watermark_file = os.path.join(output_folder, "watermark_temp.pdf")
@@ -170,6 +172,7 @@ class PDFProcessors:
 
     @staticmethod
     def preview_pdf(file_path: str) -> List[str]:
+        import fitz  # PyMuPDF
         """
         Generate low-res previews of all pages in a PDF.
         Returns a list of base64 encoded strings.

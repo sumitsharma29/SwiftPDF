@@ -19,7 +19,12 @@ async def lifespan(app: FastAPI):
     yield
     task.cancel()
 
-app = FastAPI(title="PDF Converter API", lifespan=lifespan)
+app = FastAPI(
+    title="PDF Converter API", 
+    lifespan=lifespan,
+    docs_url="/api/docs",
+    openapi_url="/api/openapi.json"
+)
 
 # CORS Headers
 origins = [
