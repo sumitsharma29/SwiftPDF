@@ -16,6 +16,7 @@ interface ToolInterfaceProps {
 }
 
 export default function ToolInterface({ tool }: ToolInterfaceProps) {
+    const { addToast } = useToast();
     const [files, setFiles] = useState<File[]>([]);
     const [settings, setSettings] = useState<any>({});
     const [loading, setLoading] = useState(false);
