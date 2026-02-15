@@ -1,0 +1,15 @@
+{
+    "name": "SwiftPDF - Free & Secure PDF Tools",
+    "short_name": "SwiftPDF",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#3b82f6",
+    "icons": [
+        {
+            "src": "/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml"
+        }
+    ]
+}

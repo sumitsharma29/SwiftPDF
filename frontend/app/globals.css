@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+body {
+  background-color: #f0f9ff;
+  background-image: 
+    radial-gradient(at 47% 33%, hsla(217,90%,86%,1) 0, transparent 59%), 
+    radial-gradient(at 82% 65%, hsla(218,84%,84%,1) 0, transparent 55%),
+    radial-gradient(at 10% 20%, hsla(290, 80%, 95%, 1) 0, transparent 40%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #1f2937;
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .glass-dark {
+    background: rgba(17, 24, 39, 0.9);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+}
+
+@theme {
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-outfit);
+}
+
+@layer base {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+
+  body {
+    font-family: var(--font-sans);
+  }
+
+  input,
+  select,
+  textarea {
+    @apply text-gray-900 placeholder:text-gray-500 font-sans;
+  }
+}
