@@ -9,22 +9,6 @@ services:
       - key: PORT
         value: 8000
       - key: ALLOWED_ORIGINS
-        fromService:
-          type: web
-          name: swiftpdf-frontend
-          property: url
+        value: "*" # Update this with your Vercel URL once deployed for better security
       - key: PYTHON_VERSION
         value: 3.10
-
-  # Frontend Service (Next.js)
-  - type: web
-    name: swiftpdf-frontend
-    runtime: docker
-    rootDir: frontend
-    plan: free
-    envVars:
-      - key: NEXT_PUBLIC_API_URL
-        fromService:
-          type: web
-          name: swiftpdf-backend
-          property: url

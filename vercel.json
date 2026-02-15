@@ -4,15 +4,10 @@
     "installCommand": "cd frontend && npm install",
     "outputDirectory": "frontend/.next",
     "framework": "nextjs",
-    "functions": {
-        "api/**/*.py": {
-            "runtime": "python3.9"
-        }
-    },
     "rewrites": [
         {
             "source": "/api/:path*",
-            "destination": "/api/index"
+            "destination": "https://YOUR_RENDER_BACKEND_URL.onrender.com/api/:path*"
         }
     ]
 }
