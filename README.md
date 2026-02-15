@@ -1,5 +1,7 @@
 # SwiftPDF (PDF Converter)
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/b562e50-d4fe-4a22-897c-9d8bf6873a20/deploy-status)](https://app.netlify.com/sites/swiftpdf/deploys)
+
 **SwiftPDF** is a powerful, secure, and privacy-focused PDF manipulation tool built with **Next.js** and **FastAPI**. It offers a suite of tools to manage your PDF documents directly in your browser, with a modern, mobile-responsive interface.
 
 ![SwiftPDF Hero](https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop)
