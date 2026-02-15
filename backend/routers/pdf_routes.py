@@ -4,8 +4,8 @@ from typing import List
 import shutil
 import os
 import zipfile
-from ..utils.pdf_processors import PDFProcessors
-from ..utils.file_utils import generate_session_id, get_session_folder
+from utils.pdf_processors import PDFProcessors
+from utils.file_utils import generate_session_id, get_session_folder
 
 router = APIRouter()
 

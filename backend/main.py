@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import asyncio
 from contextlib import asynccontextmanager
-from .utils.file_utils import cleanup_old_sessions
+from utils.file_utils import cleanup_old_sessions
 
 async def periodic_cleanup():
     while True:
@@ -46,7 +46,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from .routers import pdf_routes
+from routers import pdf_routes
 
 app.include_router(pdf_routes.router, prefix="/api")
 
