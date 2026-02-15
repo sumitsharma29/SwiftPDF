@@ -15,9 +15,16 @@ async def periodic_cleanup():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    task = asyncio.create_task(periodic_cleanup())
-    yield
-    task.cancel()
+    # Start cleanup task
+    try:
+        task = asyncio.create_task(periodic_cleanup())
+        yield
+    finally:
+        # Cancel cleanup task on shutdown
+        try:
+            task.cancel()
+        except Exception:
+            pass
 
 app = FastAPI(
     title="PDF Converter API", 
@@ -27,10 +34,8 @@ app = FastAPI(
 )
 
 # CORS Headers
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+# Allow all origins for Vercel preview deployments
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
