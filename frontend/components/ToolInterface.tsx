@@ -34,6 +34,8 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
         watermark: { title: 'Watermark PDF', description: 'Stamp an image or text over your PDF.', multiple: false, endpoint: '/api/process/watermark', color: 'text-pink-700', gradient: 'from-pink-500 to-rose-500' },
     };
 
+    const config = toolConfig[tool] || toolConfig['merge'];
+
     // File Upload Logic
     const onDrop = (acceptedFiles: File[]) => {
         setFiles(config.multiple ? [...files, ...acceptedFiles] : [acceptedFiles[0]]);
