@@ -1,0 +1,30 @@
+services:
+  # Backend Service (FastAPI + System Dependencies)
+  - type: web
+    name: swiftpdf-backend
+    runtime: docker
+    rootDir: backend
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: ALLOWED_ORIGINS
+        fromService:
+          type: web
+          name: swiftpdf-frontend
+          property: url
+      - key: PYTHON_VERSION
+        value: 3.10
+
+  # Frontend Service (Next.js)
+  - type: web
+    name: swiftpdf-frontend
+    runtime: docker
+    rootDir: frontend
+    plan: free
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: swiftpdf-backend
+          property: url

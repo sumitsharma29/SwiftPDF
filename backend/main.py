@@ -34,8 +34,9 @@ app = FastAPI(
 )
 
 # CORS Headers
-# Allow all origins for Vercel preview deployments
-origins = ["*"]
+# Get allowed origins from environment variable or use defaults for local dev
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001")
+origins = allowed_origins.split(",") if allowed_origins != "*" else ["*"]
 
 app.add_middleware(
     CORSMiddleware,
