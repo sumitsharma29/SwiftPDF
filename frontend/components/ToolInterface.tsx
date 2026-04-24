@@ -297,12 +297,15 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.95 }}
-                                {...getRootProps()}
-                                className={`
-                                    relative h-full min-h-[400px] rounded-[3rem] border-2 border-dashed transition-all duration-700 flex flex-col items-center justify-center p-10 group cursor-pointer overflow-hidden
-                                    ${isDragActive ? 'border-cyan-500 bg-cyan-500/5 scale-[0.99]' : 'border-white/10 bg-white/2 hover:border-white/20'}
-                                `}
+                                className="h-full"
                             >
+                                <div
+                                    {...getRootProps()}
+                                    className={`
+                                        relative h-full min-h-[400px] rounded-[3rem] border-2 border-dashed transition-all duration-700 flex flex-col items-center justify-center p-10 group cursor-pointer overflow-hidden
+                                        ${isDragActive ? 'border-cyan-500 bg-cyan-500/5 scale-[0.99]' : 'border-white/10 bg-white/2 hover:border-white/20'}
+                                    `}
+                                >
                                 <input {...getInputProps()} />
                                 <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                                 
@@ -338,7 +341,8 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                                         </div>
                                     )}
                                 </div>
-                            </motion.div>
+                            </div>
+                        </motion.div>
                         )}
 
                         {downloadUrl && (
