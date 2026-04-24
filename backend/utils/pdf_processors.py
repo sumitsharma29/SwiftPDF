@@ -138,7 +138,6 @@ class PDFProcessors:
         from reportlab.pdfgen import canvas
         from reportlab.lib.pagesizes import letter
         # 1. Create watermark PDF
-        # TODO: Get actual page size from input PDF for better placement
         watermark_file = os.path.join(output_folder, "watermark_temp.pdf")
         c = canvas.Canvas(watermark_file, pagesize=letter)
         c.setFont("Helvetica", 40)
@@ -152,23 +151,67 @@ class PDFProcessors:
 
         # 2. Merge with source
         watermark_reader = PdfReader(watermark_file)
-        # Check if watermark PDF has pages
         if len(watermark_reader.pages) > 0:
             watermark_page = watermark_reader.pages[0]
-            
             reader = PdfReader(file_path)
             writer = PdfWriter()
-
             for page in reader.pages:
                 page.merge_page(watermark_page)
                 writer.add_page(page)
-
             with open(output_path, "wb") as f:
                 writer.write(f)
         
-        # Cleanup
         if os.path.exists(watermark_file):
             os.remove(watermark_file)
+
+    @staticmethod
+    def extract_text(file_path: str) -> str:
+        import fitz
+        doc = fitz.open(file_path)
+        text = ""
+        for page in doc:
+            text += page.get_text() + "\n--- Page Break ---\n"
+        doc.close()
+        return text
+
+    @staticmethod
+    def repair_pdf(file_path: str, output_path: str):
+        import pikepdf
+        with pikepdf.Pdf.open(file_path, allow_overwriting_input=True) as pdf:
+            pdf.save(output_path)
+
+    @staticmethod
+    def edit_metadata(file_path: str, output_path: str, metadata: dict):
+        import pikepdf
+        with pikepdf.Pdf.open(file_path) as pdf:
+            with pdf.open_metadata() as meta:
+                if 'title' in metadata: meta['dc:title'] = metadata['title']
+                if 'author' in metadata: meta['dc:creator'] = [metadata['author']]
+                if 'subject' in metadata: meta['dc:description'] = {'x-default': metadata['subject']}
+                if 'keywords' in metadata: meta['pdf:Keywords'] = metadata['keywords']
+            pdf.save(output_path)
+
+    @staticmethod
+    def add_page_numbers(file_path: str, output_path: str, output_folder: str):
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.pagesizes import letter
+        reader = PdfReader(file_path)
+        writer = PdfWriter()
+        total_pages = len(reader.pages)
+        for i in range(total_pages):
+            temp_page_file = os.path.join(output_folder, f"temp_page_{i}.pdf")
+            c = canvas.Canvas(temp_page_file, pagesize=letter)
+            c.setFont("Helvetica", 10)
+            c.drawRightString(550, 30, f"Page {i+1} of {total_pages}")
+            c.save()
+            num_reader = PdfReader(temp_page_file)
+            page = reader.pages[i]
+            page.merge_page(num_reader.pages[0])
+            writer.add_page(page)
+            if os.path.exists(temp_page_file):
+                os.remove(temp_page_file)
+        with open(output_path, "wb") as f:
+            writer.write(f)
 
     @staticmethod
     def preview_pdf(file_path: str) -> List[str]:
@@ -197,3 +240,70 @@ class PDFProcessors:
         except Exception as e:
             print(f"Error generating preview: {str(e)}")
             raise e
+
+    @staticmethod
+    def redact_pdf(file_path: str, output_path: str, search_text: str):
+        import fitz
+        doc = fitz.open(file_path)
+        for page in doc:
+            areas = page.search_for(search_text)
+            for rect in areas:
+                page.add_redact_annot(rect, fill=(0, 0, 0)) # Black fill
+            page.apply_redactions()
+        doc.save(output_path)
+        doc.close()
+
+    @staticmethod
+    def compare_pdfs(file1: str, file2: str) -> dict:
+        import fitz
+        doc1 = fitz.open(file1)
+        doc2 = fitz.open(file2)
+        
+        report = {
+            "doc1_pages": len(doc1),
+            "doc2_pages": len(doc2),
+            "identical_page_count": 0,
+            "metadata_diff": {}
+        }
+        
+        # Simple structural comparison
+        min_pages = min(len(doc1), len(doc2))
+        for i in range(min_pages):
+            p1 = doc1[i].get_text("words")
+            p2 = doc2[i].get_text("words")
+            if p1 == p2:
+                report["identical_page_count"] += 1
+        
+        doc1.close()
+        doc2.close()
+        return report
+
+    @staticmethod
+    def sign_pdf(file_path: str, output_path: str, signature_text: str, output_folder: str):
+        from reportlab.pdfgen import canvas
+        from reportlab.lib.pagesizes import letter
+        # 1. Create signature overlay (placed at bottom right)
+        sig_file = os.path.join(output_folder, "sig_temp.pdf")
+        c = canvas.Canvas(sig_file, pagesize=letter)
+        c.setFont("Courier-BoldOblique", 20)
+        c.setFillColorRGB(0, 0, 0.5) # Dark blue
+        c.drawString(400, 50, f"Signed: {signature_text}")
+        c.save()
+
+        # 2. Merge with last page
+        reader = PdfReader(file_path)
+        writer = PdfWriter()
+        sig_reader = PdfReader(sig_file)
+        sig_page = sig_reader.pages[0]
+
+        for i in range(len(reader.pages)):
+            page = reader.pages[i]
+            if i == len(reader.pages) - 1:
+                page.merge_page(sig_page)
+            writer.add_page(page)
+            
+        with open(output_path, "wb") as f:
+            writer.write(f)
+        
+        if os.path.exists(sig_file):
+            os.remove(sig_file)

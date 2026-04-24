@@ -1,12 +1,20 @@
 @echo off
-echo Installing dependencies...
-python -m pip install -r backend/requirements.txt
-if %errorlevel% neq 0 (
-    echo Failed to install dependencies. Please ensure Python is installed and added to PATH.
+echo Activating Virtual Environment...
+if exist .venv_swift\Scripts\activate (
+    call .venv_swift\Scripts\activate
+) else if exist .venv\Scripts\activate (
+    call .venv\Scripts\activate
+) else (
+    echo Virtual environment not found. Please run: python -m venv .venv_swift
     pause
-    exit /b %errorlevel%
+    exit /b 1
 )
 
-echo Starting Backend Server...
-python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+echo Installing/Updating dependencies...
+pip install -r backend/requirements.txt
+
+echo Starting SwiftPDF Backend on port 8001...
+python -m uvicorn backend.main:app --reload --host 0.0.0.0 --port 8001
 pause
+
+

@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} ${outfit.variable} font-sans min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 relative`}>
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} ${outfit.variable} font-sans min-h-screen bg-[#050505] text-gray-100 relative selection:bg-cyan-500/30 selection:text-cyan-200`}>
         <AnimatedBackground />
         <ToastProvider>
           {children}

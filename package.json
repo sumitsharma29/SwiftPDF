@@ -4,7 +4,7 @@
     "description": "Root scripts for PDF Converter",
     "scripts": {
         "dev:frontend": "cd frontend && npm run dev",
-        "dev:backend": "python -m uvicorn backend.main:app --reload",
+        "dev:backend": "python -m uvicorn backend.main:app --reload --port 8001",
         "build:frontend": "cd frontend && npm run build",
         "start:frontend": "cd frontend && npm start",
         "docker:up": "docker-compose up --build",

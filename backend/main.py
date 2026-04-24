@@ -1,9 +1,18 @@
+import sys
+import os
+
+# Add current directory to path to allow absolute imports from within backend/
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 import asyncio
 from contextlib import asynccontextmanager
+from dotenv import load_dotenv
 from utils.file_utils import cleanup_old_sessions
+
+# Load environment variables
+load_dotenv()
 
 async def periodic_cleanup():
     while True:
@@ -35,7 +44,7 @@ app = FastAPI(
 
 # CORS Headers
 # Get allowed origins from environment variable or use defaults for local dev
-allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001")
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,http://127.0.0.1:3001")
 origins = allowed_origins.split(",") if allowed_origins != "*" else ["*"]
 
 app.add_middleware(
@@ -53,3 +62,8 @@ app.include_router(pdf_routes.router, prefix="/api")
 @app.get("/")
 def read_root():
     return {"message": "PDF Converter API is running"}
+
+@app.get("/api")
+def read_api_root():
+    return {"status": "online", "message": "SwiftPDF Core API"}
+

@@ -1,66 +1,125 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X, Sparkles, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Logo from './Logo';
+import axios from 'axios';
 
 const tools = [
-    { name: 'Merge PDF', href: '/tools/merge', color: 'text-red-600' },
-    { name: 'Split PDF', href: '/tools/split', color: 'text-orange-600' },
-    { name: 'Organize PDF', href: '/tools/organize', color: 'text-yellow-600' },
-    { name: 'Compress PDF', href: '/tools/compress', color: 'text-green-600' },
-    { name: 'PDF to JPG', href: '/tools/pdf-to-jpg', color: 'text-teal-600' },
-    { name: 'JPG to PDF', href: '/tools/jpg-to-pdf', color: 'text-blue-600' },
-    { name: 'Lock PDF', href: '/tools/lock', color: 'text-indigo-600' },
-    { name: 'Unlock PDF', href: '/tools/unlock', color: 'text-purple-600' },
-    { name: 'Watermark', href: '/tools/watermark', color: 'text-pink-600' },
+    { name: 'Merge PDF', href: '/tools/merge', color: 'text-red-500' },
+    { name: 'Split PDF', href: '/tools/split', color: 'text-orange-500' },
+    { name: 'Organize PDF', href: '/tools/organize', color: 'text-yellow-500' },
+    { name: 'Compress PDF', href: '/tools/compress', color: 'text-emerald-500' },
+    { name: 'PDF to JPG', href: '/tools/pdf-to-jpg', color: 'text-teal-500' },
+    { name: 'JPG to PDF', href: '/tools/jpg-to-pdf', color: 'text-blue-500' },
+    { name: 'Sign PDF', href: '/tools/sign', color: 'text-purple-400' },
+    { name: 'Redact PDF', href: '/tools/redact', color: 'text-rose-500' },
+    { name: 'Compare PDFs', href: '/tools/compare', color: 'text-indigo-400' },
+    { name: 'Extract Text', href: '/tools/extract-text', color: 'text-cyan-500' },
+    { name: 'Repair PDF', href: '/tools/repair', color: 'text-emerald-500' },
+    { name: 'Edit Metadata', href: '/tools/edit-metadata', color: 'text-slate-500' },
+    { name: 'Page Numbers', href: '/tools/add-page-numbers', color: 'text-blue-600' },
+    { name: 'Lock PDF', href: '/tools/lock', color: 'text-indigo-500' },
+    { name: 'Unlock PDF', href: '/tools/unlock', color: 'text-purple-500' },
+    { name: 'Watermark PDF', href: '/tools/watermark', color: 'text-pink-500' },
 ];
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [backendOnline, setBackendOnline] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        
+        // Health check
+        const checkBackend = async () => {
+            try {
+                await axios.get('/api/');
+                setBackendOnline(true);
+            } catch (e) {
+                setBackendOnline(false);
+            }
+        };
+        checkBackend();
+        const interval = setInterval(checkBackend, 10000);
+
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            clearInterval(interval);
+        };
+    }, []);
 
     return (
-        <nav className="fixed top-0 left-0 right-0 z-50 px-4 py-4 sm:px-6 font-sans">
-            <div className="max-w-7xl mx-auto glass rounded-2xl sm:rounded-full px-4 py-3 sm:px-8 sm:py-4 flex items-center justify-between shadow-lg sm:shadow-2xl border border-white/60 backdrop-blur-xl relative">
-                <Link href="/" className="flex items-center space-x-2 sm:space-x-3 text-gray-900 hover:opacity-80 transition-opacity z-50">
-                    <div className="bg-gradient-to-tr from-blue-100 to-violet-100 p-1.5 sm:p-2 rounded-lg sm:rounded-xl shadow-inner">
-                        <Logo className="w-6 h-6 sm:w-8 sm:h-8" />
+        <header className="fixed top-0 left-0 right-0 z-[100] flex justify-center p-4 sm:p-6 pointer-events-none">
+            <motion.nav 
+                initial={{ y: -100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className={`
+                    pointer-events-auto flex items-center justify-between w-full max-w-7xl 
+                    px-4 py-2 sm:px-8 sm:py-3 rounded-full transition-all duration-500
+                    ${scrolled ? 'glass-panel shadow-2xl scale-[0.98]' : 'bg-transparent'}
+                `}
+            >
+                <div className="flex items-center space-x-6">
+                    <Link href="/" className="flex items-center space-x-3 group">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-cyan-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity" />
+                            <div className="relative bg-gradient-to-tr from-cyan-500 to-blue-600 p-2 rounded-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all">
+                                <Logo className="w-6 h-6 text-white" />
+                            </div>
+                        </div>
+                        <span className="text-xl sm:text-2xl font-black tracking-tighter text-white">Swift<span className="text-cyan-500">PDF</span></span>
+                    </Link>
+
+                    <div className={`flex items-center space-x-2 px-3 py-1 rounded-full border border-white/5 bg-white/2 ${backendOnline === true ? 'text-emerald-500' : backendOnline === false ? 'text-rose-500' : 'text-gray-500'}`}>
+                        <div className={`w-1.5 h-1.5 rounded-full animate-pulse bg-current`} />
+                        <span className="text-[10px] font-black uppercase tracking-widest">
+                            {backendOnline === true ? 'Core Online' : backendOnline === false ? 'Core Offline' : 'Initializing'}
+                        </span>
                     </div>
-                    <span className="text-lg sm:text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700">SwiftPDF</span>
-                </Link>
+                </div>
 
                 {/* Desktop Menu */}
-                <div className="hidden md:flex items-center space-x-8">
+                <div className="hidden md:flex items-center space-x-1">
                     <div className="relative group">
-                        <button className="flex items-center space-x-1 text-gray-700 hover:text-blue-600 font-semibold transition-colors text-sm uppercase tracking-wider py-2">
-                            <span>Tools</span>
-                            <ChevronDown size={16} className="group-hover:rotate-180 transition-transform duration-300" />
+                        <button className="flex items-center space-x-2 px-6 py-2.5 rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest">
+                            <span>Intelligence Tools</span>
+                            <ChevronDown size={14} className="group-hover:rotate-180 transition-transform duration-500" />
                         </button>
 
-                        <div className="absolute top-full right-0 w-64 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2">
-                            <div className="glass rounded-xl shadow-xl border border-white/50 overflow-hidden p-2 bg-white/90 backdrop-blur-xl">
-                                <div className="grid gap-1">
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 w-[600px] pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500 transform group-hover:translate-y-0 translate-y-4">
+                            <div className="glass-panel rounded-3xl overflow-hidden p-4 shadow-3xl border border-white/10">
+                                <div className="grid grid-cols-2 gap-2">
                                     {tools.map((tool) => (
                                         <Link
                                             key={tool.href}
                                             href={tool.href}
-                                            className="block px-4 py-2.5 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium text-gray-700 hover:text-blue-700 flex items-center"
+                                            className="flex items-center space-x-4 p-3 rounded-2xl hover:bg-white/5 transition-all group/item"
                                         >
-                                            <span className={`w-2 h-2 rounded-full mr-3 ${tool.color.replace('text-', 'bg-')}`}></span>
-                                            {tool.name}
+                                            <div className={`w-2 h-2 rounded-full ${tool.color.replace('text-', 'bg-')} shadow-[0_0_10px_currentColor] group-hover/item:scale-150 transition-transform`} />
+                                            <span className="text-sm font-bold text-gray-300 group-hover/item:text-white">{tool.name}</span>
                                         </Link>
                                     ))}
+                                </div>
+                                <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center px-2">
+                                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">All processing is local & secure</span>
+                                    <Sparkles size={12} className="text-cyan-500" />
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <Link href="/about" className="px-6 py-2.5 rounded-full text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-bold uppercase tracking-widest">About</Link>
                 </div>
 
                 {/* Mobile Hamburger */}
                 <button
-                    className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors z-50 active:scale-95"
+                    className="md:hidden p-3 text-gray-300 hover:bg-white/5 rounded-full transition-all active:scale-90"
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 >
                     {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -70,26 +129,22 @@ export default function Navbar() {
                 <AnimatePresence>
                     {isMobileMenuOpen && (
                         <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="absolute top-full left-0 right-0 p-2 md:hidden"
+                            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+                            className="absolute top-full left-0 right-0 mt-4 p-2 md:hidden"
                         >
-                            <div className="glass rounded-2xl shadow-2xl border border-white/60 bg-white/95 backdrop-blur-xl overflow-hidden p-2 max-h-[75vh] overflow-y-auto">
-                                <div className="grid gap-1">
-                                    <p className="px-4 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest sticky top-0 bg-white/95 backdrop-blur-xl z-10 border-b border-gray-100 mb-1">Select Tool</p>
+                            <div className="glass-panel rounded-3xl overflow-hidden p-4 shadow-3xl">
+                                <div className="space-y-1">
                                     {tools.map((tool) => (
                                         <Link
                                             key={tool.href}
                                             href={tool.href}
                                             onClick={() => setIsMobileMenuOpen(false)}
-                                            className="flex items-center px-4 py-3.5 rounded-xl hover:bg-blue-50 transition-colors text-gray-700 font-medium group"
+                                            className="flex items-center p-4 rounded-2xl hover:bg-white/5 transition-all group"
                                         >
-                                            <span className={`w-8 h-8 rounded-full mr-3 flex items-center justify-center bg-gray-50 group-hover:bg-white transition-colors shadow-sm`}>
-                                                <span className={`w-2.5 h-2.5 rounded-full ${tool.color.replace('text-', 'bg-')}`}></span>
-                                            </span>
-                                            <span className="text-base text-gray-900">{tool.name}</span>
+                                            <div className={`w-3 h-3 rounded-full mr-4 ${tool.color.replace('text-', 'bg-')} shadow-[0_0_8px_currentColor]`} />
+                                            <span className="text-lg font-bold text-gray-200">{tool.name}</span>
                                         </Link>
                                     ))}
                                 </div>
@@ -97,7 +152,8 @@ export default function Navbar() {
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
-        </nav>
+            </motion.nav>
+        </header>
     );
 }
+

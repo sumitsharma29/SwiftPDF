@@ -1,78 +1,127 @@
-# SwiftPDF (PDF Converter)
+# 💠 SwiftPDF Intelligence Suite
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/b562e50-d4fe-4a22-897c-9d8bf6873a20/deploy-status)](https://app.netlify.com/sites/swiftpdf/deploys)
+<div align="center">
 
-**SwiftPDF** is a powerful, secure, and privacy-focused PDF manipulation tool built with **Next.js** and **FastAPI**. It offers a suite of tools to manage your PDF documents directly in your browser, with a modern, mobile-responsive interface.
+[![Next.js](https://img.shields.io/badge/Next.js-15+-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-v0.100+-05998b?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org)
+[![MIT License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-![SwiftPDF Hero](https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop)
+**Architecting the future of document intelligence.** 
+*Secure. Private. Instant.*
 
-## 🚀 Features
+[Explore Tools](#-intelligence-ecosystem) • [Architecture](#-core-architecture) • [Local Setup](#-installation--deployment) • [About the Author](#-connect-with-me)
 
-### Core Tools
-- **Merge PDF**: Combine multiple PDFs into a single document.
-- **Split PDF**: Extract specific pages or split a PDF into multiple files.
-- **Organize PDF**: Reorder, rotate, and remove pages.
-- **Compress PDF**: Reduce file size while maintaining quality (powered by `pikepdf`).
-- **Convert**: PDF to JPG and JPG to PDF conversion.
-- **Security**: Lock (encrypt) and Unlock (decrypt) PDFs.
-- **Watermark**: Add text watermarks to your documents.
+</div>
 
-### Key Highlights
-- **100% Free & Private**: No files are stored permanently. All processing happens in ephemeral sessions.
-- **Mobile First**: Fully responsive "App-like" experience on mobile devices with installable **PWA** support.
-- **Secure**: Magic byte validation ensures only legitimate files are processed.
-- **Fast**: Optimized Python backend for heavy PDF processing tasks.
+---
 
-## 🛠️ Tech Stack
+## ⚡ The SwiftPDF Vision
 
-- **Frontend**: Next.js 14, Tailwind CSS, Framer Motion, Lucide React
-- **Backend**: Python 3.10+, FastAPI, PyPDF, Pikepdf, ReportLab
-- **Infrastructure**: Vercel Serverless Functions
+**SwiftPDF** is an ultra-premium, privacy-first document intelligence platform. Engineered with a "Cyber-Cockpit" aesthetic, it leverages a high-performance **FastAPI** backbone and a fluid **Next.js** interface to deliver elite-level PDF manipulation directly in your browser.
 
-## 🚀 Deployment
+> [!IMPORTANT]
+> **Privacy Protocol**: No files are ever stored. All processing occurs in isolated, ephemeral memory sessions. Your data remains your own.
 
-This project is configured for seamless deployment on **Vercel**.
+---
 
-### Prerequisites
-1.  A [Vercel](https://vercel.com) account.
-2.  Verified GitHub repository.
+## 🛠 Intelligence Ecosystem
 
-### Steps
-1.  **Fork/Clone** this repository and push to your GitHub.
-2.  Import the project in Vercel.
-3.  Vercel will automatically detect the **Next.js** frontend.
-4.  **Environment Variables**:
-    - `NEXT_PUBLIC_API_URL`: Set this to your deployed domain (e.g., `https://your-app.vercel.app`) or `/api` if using the built-in rewrites.
-5.  Click **Deploy**.
+SwiftPDF provides 16 surgical-grade tools categorized for professional workflows:
 
-The `vercel.json` and `api/index.py` files are already configured to route API requests to the Python serverless backend.
+### 📄 Structural Engineering
+- **Merge PDF**: Consolidate multiple documents with structural integrity.
+- **Split PDF**: Deconstruct documents with surgical page extraction.
+- **Organize PDF**: Architect your document flow with reordering and rotation.
+- **Repair PDF**: Restore integrity to damaged or corrupted PDF sources.
 
-## 💻 Local Development
+### 🔐 Security & Compliance
+- **Lock PDF**: Enforce military-grade AES encryption on sensitive data.
+- **Unlock PDF**: Decrypt authorized documents with precision.
+- **Sign PDF**: Authenticate documents with professional signature overlays.
+- **Redact PDF**: Permanently obscure sensitive data with absolute certainty.
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/sumitsharma29/SwiftPDF.git
-    cd SwiftPDF
-    ```
+### ⚙️ Optimization & Conversion
+- **Compress PDF**: Optimize storage via intelligent asset reduction.
+- **PDF to JPG**: Decompose PDF pages into high-fidelity raster assets.
+- **JPG to PDF**: Assemble high-resolution images into standardized PDF format.
+- **Extract Text**: Harvest semantic content using advanced OCR engines.
 
-2.  **Backend Setup**:
-    ```bash
-    # Install dependencies
-    pip install -r backend/requirements.txt
-    
-    # Run server
-    python -m uvicorn backend.main:app --reload
-    ```
+### 📝 Metadata & Indexing
+- **Edit Metadata**: Control internal document properties and indexing.
+- **Page Numbers**: Implement dynamic, sequential indexing protocols.
+- **Watermark PDF**: Brand documents with secure identity markers.
+- **Compare PDFs**: Execute deep structural analysis between documents.
 
-3.  **Frontend Setup**:
-    ```bash
-    cd frontend
-    npm install
-    npm run dev
-    ```
+---
 
-4.  Open `http://localhost:3000` in your browser.
+## 🏗 Core Architecture
 
-## 📄 License
+SwiftPDF is built on a distributed "Vanta-Glass" architecture designed for sub-100ms UI responsiveness and heavy-duty backend processing.
 
-This project is licensed under the MIT License.
+- **Frontend**: `Next.js 15+` with `Turbopack`, `Framer Motion` for neural animations, and `Tailwind CSS`.
+- **Backend**: `FastAPI` (Python) serving as a high-concurrency processing core.
+- **PDF Engines**: `PyMuPDF`, `Pikepdf`, and `ReportLab` for pixel-perfect manipulation.
+- **Security**: Magic-byte validation and isolated ephemeral processing loops.
+
+---
+
+## 🚀 Installation & Deployment
+
+### 💻 Local Development Setup
+
+1. **Clone the Intelligence Suite**
+   ```bash
+   git clone https://github.com/sumitsharma29/SwiftPDF.git
+   cd SwiftPDF
+   ```
+
+2. **Initialize Backend Core**
+   ```bash
+   # Create and activate environment
+   python -m venv .venv_swift
+   source .venv_swift/bin/activate # or .venv_swift\Scripts\activate on Windows
+   
+   # Install processing kernels
+   pip install -r backend/requirements.txt
+   
+   # Deploy local API
+   python -m uvicorn backend.main:app --host 0.0.0.0 --port 8001 --reload
+   ```
+
+3. **Initialize Frontend Interface**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+### ☁️ Cloud Deployment
+
+The suite is optimized for **Vercel** (Frontend) and **DigitalOcean/Render** (Backend).
+- Ensure `NEXT_PUBLIC_API_URL` is configured to point to your production API endpoint.
+
+---
+
+## 🤝 Connect With Me
+
+Built with ❤️ by **Sumit Sharma**. If you find this project useful, consider giving it a ⭐!
+
+<div align="left">
+  <a href="https://www.linkedin.com/in/sumit-sharma-78b93b294">
+    <img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" />
+  </a>
+  <a href="https://github.com/sumitsharma29">
+    <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />
+  </a>
+  <a href="https://www.instagram.com/sumit__sharma__29">
+    <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" />
+  </a>
+</div>
+
+---
+
+<div align="center">
+  <sub>&copy; 2026 SwiftPDF Labs. All rights reserved.</sub>
+</div>
