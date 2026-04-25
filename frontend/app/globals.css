@@ -21,24 +21,25 @@ body {
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
-/* Premium Noise Grain */
+/* Subtle Grain Overlay - Optimized */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   z-index: 9999;
-  opacity: 0.03;
+  opacity: 0.015;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  filter: contrast(150%) brightness(1000%);
 }
 
 @layer utilities {
   .glass-panel {
     background: var(--glass);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.6);
   }
 
   .glass-panel-hover:hover {
@@ -65,13 +66,14 @@ body::after {
     inset: -1px;
     background: linear-gradient(90deg, transparent, var(--primary), transparent);
     background-size: 200% 100%;
-    animation: beam 3s linear infinite;
+    animation: beam 4s linear infinite;
     z-index: -1;
     border-radius: inherit;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     -webkit-mask-composite: destination-out;
     padding: 1px;
+    will-change: background-position;
   }
 
   @keyframes beam {
@@ -149,13 +151,13 @@ body::after {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background-image: 
-      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: 60px 60px;
+      linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+    background-size: 80px 80px;
     z-index: -1;
     pointer-events: none;
-    mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
-    animation: var(--animate-grid);
+    mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 10%, transparent 70%);
+    will-change: transform;
   }
 }

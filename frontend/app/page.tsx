@@ -153,7 +153,7 @@ export default function Home() {
     offset: ["start start", "end end"]
   });
 
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 
   const filteredTools = tools.filter(tool => 
     tool.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -168,9 +168,9 @@ export default function Home() {
           style={{ y: backgroundY }}
           className="absolute inset-0 opacity-40"
         >
-          <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-cyan-500/10 rounded-full blur-[160px] animate-pulse-slow" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[900px] h-[900px] bg-purple-600/10 rounded-full blur-[180px]" />
-          <div className="absolute top-[30%] right-[20%] w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[140px]" />
+          <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[700px] h-[700px] bg-purple-600/5 rounded-full blur-[140px]" />
+          <div className="absolute top-[30%] right-[20%] w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[100px]" />
         </motion.div>
       </div>
 

@@ -61,8 +61,8 @@ export default function Navbar() {
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                 className={`
                     pointer-events-auto flex items-center justify-between w-full max-w-7xl 
-                    px-4 py-2 sm:px-8 sm:py-3 rounded-full transition-all duration-500
-                    ${scrolled ? 'glass-panel shadow-2xl scale-[0.98]' : 'bg-transparent'}
+                    px-4 py-2 sm:px-8 sm:py-3 rounded-full transition-[background-color,border-color,box-shadow,transform] duration-500
+                    ${scrolled ? 'glass-panel shadow-2xl scale-[0.99]' : 'bg-transparent scale-100'}
                 `}
             >
                 <div className="flex items-center space-x-6">

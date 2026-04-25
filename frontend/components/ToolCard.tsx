@@ -57,8 +57,8 @@ export default function ToolCard({ title, description, icon: Icon, href, color, 
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.8, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
-        whileHover={{ y: -10 }}
-        className="relative glass-panel rounded-[2rem] p-8 h-full transition-all duration-500 overflow-hidden flex flex-col justify-between border-beam"
+        whileHover={{ y: -8, transition: { duration: 0.3, ease: "easeOut" } }}
+        className="relative glass-panel rounded-[2rem] p-8 h-full overflow-hidden flex flex-col justify-between border-beam"
       >
         {/* Spotlight */}
         <motion.div
