@@ -312,14 +312,28 @@ class PDFProcessors:
     def pdf_from_pptx(file_path: str, output_path: str):
         try:
             import comtypes.client
-            powerpoint = comtypes.client.CreateObject("Powerpoint.Application")
-            powerpoint.Visible = 1
-            deck = powerpoint.Presentations.Open(os.path.abspath(file_path))
-            deck.SaveAs(os.path.abspath(output_path), 32)
-            deck.Close()
-            powerpoint.Quit()
-        except Exception:
-            raise RuntimeError("PPT to PDF requires Microsoft PowerPoint installed on Windows.")
+            import pythoncom
+            # Initialize COM for this thread
+            pythoncom.CoInitialize()
+            try:
+                # Create PowerPoint instance
+                powerpoint = comtypes.client.CreateObject("Powerpoint.Application")
+                
+                # Open presentation (FileName, ReadOnly, Untitled, WithWindow)
+                # Using positional arguments for maximum compatibility with comtypes
+                abs_file_path = os.path.abspath(file_path)
+                abs_output_path = os.path.abspath(output_path)
+                
+                deck = powerpoint.Presentations.Open(abs_file_path, 1, 0, 0) # ReadOnly=1, Untitled=0, WithWindow=0
+                
+                # SaveAs (FileName, FileFormat=32 for PDF)
+                deck.SaveAs(abs_output_path, 32)
+                deck.Close()
+            finally:
+                # Uninitialize COM
+                pythoncom.CoUninitialize()
+        except Exception as e:
+            raise RuntimeError(f"PPT to PDF failed: {str(e)}. Please ensure MS PowerPoint is installed.")
 
     @staticmethod
     def remove_pages(file_path: str, output_path: str, page_range: str):
@@ -387,38 +401,42 @@ class PDFProcessors:
     def excel_to_pdf(file_path: str, output_path: str):
         try:
             import comtypes.client
-            excel = comtypes.client.CreateObject("Excel.Application")
-            excel.Visible = 0
-            # Open workbook
-            wb = excel.Workbooks.Open(os.path.abspath(file_path))
-            # 5 is the format for PDF in Excel
-            wb.ExportAsFixedFormat(0, os.path.abspath(output_path))
-            wb.Close()
-            excel.Quit()
+            import pythoncom
+            pythoncom.CoInitialize()
+            try:
+                excel = comtypes.client.CreateObject("Excel.Application")
+                excel.Visible = False
+                wb = excel.Workbooks.Open(os.path.abspath(file_path))
+                wb.ExportAsFixedFormat(0, os.path.abspath(output_path))
+                wb.Close()
+            finally:
+                pythoncom.CoUninitialize()
         except Exception:
-            # Fallback to pandas/reportlab if Interop fails
+            # Fallback to simple PDF generation
             import pandas as pd
-            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
             from reportlab.lib.pagesizes import letter
-            from reportlab.lib import colors
+            from reportlab.pdfgen import canvas
             
             df = pd.read_excel(file_path)
-            data = [df.columns.to_list()] + df.values.tolist()
+            c = canvas.Canvas(output_path, pagesize=letter)
+            width, height = letter
+            y = height - 50
             
-            doc = SimpleDocTemplate(output_path, pagesize=letter)
-            elements = []
-            t = Table(data)
-            t.setStyle(TableStyle([
-                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-                ('GRID', (0, 0), (-1, -1), 1, colors.black)
-            ]))
-            elements.append(t)
-            doc.build(elements)
+            # Simple header
+            c.setFont("Helvetica-Bold", 10)
+            header = " | ".join(str(col) for col in df.columns)
+            c.drawString(50, y, header)
+            y -= 20
+            
+            c.setFont("Helvetica", 8)
+            for _, row in df.iterrows():
+                row_str = " | ".join(str(val) for val in row.values)
+                c.drawString(50, y, row_str[:120]) # Truncate long lines
+                y -= 15
+                if y < 50:
+                    c.showPage()
+                    y = height - 50
+            c.save()
 
     @staticmethod
     def html_to_pdf(file_path: str, output_path: str):
