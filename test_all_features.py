@@ -3,7 +3,7 @@ import os
 import fitz  # PyMuPDF
 from PIL import Image
 
-BASE_URL = "http://localhost:8000/api/process"
+BASE_URL = "http://localhost:8001/api/process"
 
 def create_dummy_pdf(filename="test.pdf", pages=3):
     doc = fitz.open()

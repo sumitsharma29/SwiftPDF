@@ -16,14 +16,16 @@ const tools = [
     { name: 'JPG to PDF', href: '/tools/jpg-to-pdf', color: 'text-blue-500' },
     { name: 'Sign PDF', href: '/tools/sign', color: 'text-purple-400' },
     { name: 'Redact PDF', href: '/tools/redact', color: 'text-rose-500' },
-    { name: 'Compare PDFs', href: '/tools/compare', color: 'text-indigo-400' },
-    { name: 'Extract Text', href: '/tools/extract-text', color: 'text-cyan-500' },
-    { name: 'Repair PDF', href: '/tools/repair', color: 'text-emerald-500' },
-    { name: 'Edit Metadata', href: '/tools/edit-metadata', color: 'text-slate-500' },
-    { name: 'Page Numbers', href: '/tools/add-page-numbers', color: 'text-blue-600' },
-    { name: 'Lock PDF', href: '/tools/lock', color: 'text-indigo-500' },
+    { name: 'Compare PDF', href: '/tools/compare', color: 'text-indigo-400' },
+    { name: 'OCR PDF', href: '/tools/ocr', color: 'text-blue-400' },
+    { name: 'Remove BG', href: '/tools/remove-bg', color: 'text-rose-400' },
+    { name: 'PDF to Excel', href: '/tools/pdf-to-excel', color: 'text-emerald-400' },
+    { name: 'Word to PDF', href: '/tools/word-to-pdf', color: 'text-blue-500' },
+    { name: 'PDF to Word', href: '/tools/pdf-to-word', color: 'text-blue-400' },
+    { name: 'Remove Pages', href: '/tools/remove-pages', color: 'text-red-500' },
+    { name: 'Rotate PDF', href: '/tools/rotate-pdf', color: 'text-yellow-500' },
+    { name: 'Crop PDF', href: '/tools/crop-pdf', color: 'text-teal-400' },
     { name: 'Unlock PDF', href: '/tools/unlock', color: 'text-purple-500' },
-    { name: 'Watermark PDF', href: '/tools/watermark', color: 'text-pink-500' },
 ];
 
 export default function Navbar() {
@@ -38,7 +40,9 @@ export default function Navbar() {
         // Health check
         const checkBackend = async () => {
             try {
-                await axios.get('/api/');
+                // Use absolute URL to bypass Next.js rewrite for initial check if needed, 
+                // but /api is usually rewritten correctly.
+                await axios.get('/api');
                 setBackendOnline(true);
             } catch (e) {
                 setBackendOnline(false);
@@ -58,11 +62,11 @@ export default function Navbar() {
             <motion.nav 
                 initial={{ y: -100, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
                 className={`
                     pointer-events-auto flex items-center justify-between w-full max-w-7xl 
-                    px-4 py-2 sm:px-8 sm:py-3 rounded-full transition-[background-color,border-color,box-shadow,transform] duration-500
-                    ${scrolled ? 'glass-panel shadow-2xl scale-[0.99]' : 'bg-transparent scale-100'}
+                    px-4 py-2 sm:px-8 sm:py-3 rounded-full transition-all duration-700 ease-[0.23, 1, 0.32, 1]
+                    ${scrolled ? 'glass-panel shadow-2xl backdrop-blur-2xl' : 'bg-transparent'}
                 `}
             >
                 <div className="flex items-center space-x-6">

@@ -17,33 +17,28 @@ class PDFProcessors:
 
     @staticmethod
     def split_pdf(file_path: str, output_path: str, page_range: str):
-        # page_range format: "1-5" (1-based)
+        # page_range format: "1-5", "1,3,5" or "1-2, 5"
         reader = PdfReader(file_path)
         writer = PdfWriter()
         
         try:
-            if '-' in page_range:
-                start, end = map(int, page_range.split('-'))
-                # Convert to 0-based index
-                start_idx = start - 1
-                end_idx = end
-                
-                # Bounds check
-                if start_idx < 0: start_idx = 0
-                if end_idx > len(reader.pages): end_idx = len(reader.pages)
+            pages_to_keep = set()
+            for part in page_range.split(','):
+                part = part.strip()
+                if '-' in part:
+                    start, end = map(int, part.split('-'))
+                    pages_to_keep.update(range(start-1, end))
+                else:
+                    pages_to_keep.add(int(part)-1)
 
-                for i in range(start_idx, end_idx):
+            for i in range(len(reader.pages)):
+                if i in pages_to_keep:
                     writer.add_page(reader.pages[i])
-            else:
-                 # Handle single page input "5"
-                 page_num = int(page_range) - 1
-                 if 0 <= page_num < len(reader.pages):
-                     writer.add_page(reader.pages[page_num])
             
             with open(output_path, "wb") as f:
                 writer.write(f)
-        except ValueError:
-            raise ValueError("Invalid page range format. Use 'start-end' or 'page_num'.")
+        except Exception:
+            raise ValueError("Invalid page range format. Use '1-5', '1,3,5' or '1-2, 5'.")
 
     @staticmethod
     def organize_pdf(file_path: str, output_path: str, page_order: List[int], rotation: dict):
@@ -170,9 +165,268 @@ class PDFProcessors:
         doc = fitz.open(file_path)
         text = ""
         for page in doc:
-            text += page.get_text() + "\n--- Page Break ---\n"
+            text += page.get_text()
         doc.close()
         return text
+
+    @staticmethod
+    def pdf_from_images(image_paths: List[str], output_path: str):
+        import img2pdf
+        with open(output_path, "wb") as f:
+            f.write(img2pdf.convert(image_paths))
+
+    @staticmethod
+    def pdf_from_psd(file_path: str, output_path: str):
+        from psd_tools import PSDImage
+        import img2pdf
+        from io import BytesIO
+        psd = PSDImage.open(file_path)
+        img = psd.composite()
+        img_byte_arr = BytesIO()
+        img.save(img_byte_arr, format='PNG')
+        with open(output_path, "wb") as f:
+            f.write(img2pdf.convert(img_byte_arr.getvalue()))
+
+    @staticmethod
+    def pdf_from_base64(b64_string: str, output_path: str):
+        import base64
+        if ',' in b64_string:
+            b64_string = b64_string.split(',')[1]
+        pdf_data = base64.b64decode(b64_string)
+        with open(output_path, "wb") as f:
+            f.write(pdf_data)
+
+    @staticmethod
+    def pdf_from_data(data: str, format_type: str, output_path: str):
+        from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas
+        c = canvas.Canvas(output_path, pagesize=letter)
+        textobject = c.beginText()
+        textobject.setTextOrigin(50, 750)
+        textobject.setFont("Helvetica", 10)
+        
+        lines = data.split('\n')
+        for line in lines:
+            textobject.textLine(line)
+        
+        c.drawText(textobject)
+        c.showPage()
+        c.save()
+
+    @staticmethod
+    def pdf_to_data(file_path: str, format_type: str) -> str:
+        import json
+        import yaml
+        text = PDFProcessors.extract_text(file_path)
+        data = {"content": text, "filename": os.path.basename(file_path)}
+        if format_type == 'json':
+            return json.dumps(data, indent=4)
+        elif format_type == 'yaml':
+            return yaml.dump(data)
+        elif format_type == 'xml':
+            return f"<pdf><filename>{data['filename']}</filename><content>{data['content']}</content></pdf>"
+        return text
+
+    @staticmethod
+    def pdf_to_tiff(file_path: str, output_path: str):
+        import fitz
+        doc = fitz.open(file_path)
+        from PIL import Image
+        images = []
+        for page in doc:
+            pix = page.get_pixmap()
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            images.append(img)
+        if images:
+            images[0].save(output_path, save_all=True, append_images=images[1:], compression="tiff_deflate")
+        doc.close()
+
+    @staticmethod
+    def ocr_pdf(file_path: str, output_path: str, lang: str = "eng"):
+        import fitz
+        import pytesseract
+        from PIL import Image
+        
+        # Check if tesseract is installed
+        try:
+            pytesseract.get_tesseract_version()
+        except Exception:
+            raise RuntimeError("Tesseract OCR binary not found. Please install Tesseract-OCR on your system and add it to PATH.")
+
+        doc = fitz.open(file_path)
+        pdf_writer = fitz.open()
+        for page in doc:
+            pix = page.get_pixmap(matrix=fitz.Matrix(2, 2)) # Higher res for OCR
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            ocr_pdf_bytes = pytesseract.image_to_pdf_or_hocr(img, extension='pdf', lang=lang)
+            ocr_page_doc = fitz.open("pdf", ocr_pdf_bytes)
+            pdf_writer.insert_pdf(ocr_page_doc)
+        pdf_writer.save(output_path)
+        pdf_writer.close()
+        doc.close()
+
+    @staticmethod
+    def remove_bg(file_path: str, output_path: str):
+        try:
+            from rembg import remove
+            import fitz
+            from PIL import Image
+            import img2pdf
+            from io import BytesIO
+            
+            doc = fitz.open(file_path)
+            images_data = []
+            for page in doc:
+                # Explicitly use RGB colorspace to ensure compatibility with PIL
+                pix = page.get_pixmap(colorspace=fitz.csRGB)
+                img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                
+                # Perform background removal
+                output_img = remove(img)
+                
+                # rembg returns RGBA, we save as PNG to preserve transparency for img2pdf
+                img_byte_arr = BytesIO()
+                output_img.save(img_byte_arr, format='PNG')
+                images_data.append(img_byte_arr.getvalue())
+            
+            if not images_data:
+                raise ValueError("No pages found in PDF")
+
+            # Convert images back to PDF
+            pdf_bytes = img2pdf.convert(images_data)
+            with open(output_path, "wb") as f:
+                f.write(pdf_bytes)
+            doc.close()
+        except ImportError:
+            raise RuntimeError("The 'rembg' library is not correctly installed. Try running: pip install rembg onnxruntime")
+        except Exception as e:
+            raise RuntimeError(f"Background removal failed: {str(e)}. This tool requires a local AI model download (~170MB) and may fail if the connection is unstable or onnxruntime is incompatible.")
+
+    @staticmethod
+    def pdf_to_pdfa(file_path: str, output_path: str):
+        import pikepdf
+        with pikepdf.open(file_path) as pdf:
+            pdf.save(output_path, pdf_a=True)
+
+    @staticmethod
+    def pdf_from_pptx(file_path: str, output_path: str):
+        try:
+            import comtypes.client
+            powerpoint = comtypes.client.CreateObject("Powerpoint.Application")
+            powerpoint.Visible = 1
+            deck = powerpoint.Presentations.Open(os.path.abspath(file_path))
+            deck.SaveAs(os.path.abspath(output_path), 32)
+            deck.Close()
+            powerpoint.Quit()
+        except Exception:
+            raise RuntimeError("PPT to PDF requires Microsoft PowerPoint installed on Windows.")
+
+    @staticmethod
+    def remove_pages(file_path: str, output_path: str, page_range: str):
+        reader = PdfReader(file_path)
+        writer = PdfWriter()
+        
+        # Parse range like "1, 3-5"
+        pages_to_remove = set()
+        for part in page_range.split(','):
+            if '-' in part:
+                start, end = map(int, part.split('-'))
+                pages_to_remove.update(range(start-1, end))
+            else:
+                pages_to_remove.add(int(part)-1)
+        
+        for i in range(len(reader.pages)):
+            if i not in pages_to_remove:
+                writer.add_page(reader.pages[i])
+        
+        with open(output_path, "wb") as f:
+            writer.write(f)
+
+    @staticmethod
+    def rotate_pdf(file_path: str, output_path: str, angle: int):
+        reader = PdfReader(file_path)
+        writer = PdfWriter()
+        for page in reader.pages:
+            page.rotate(angle)
+            writer.add_page(page)
+        with open(output_path, "wb") as f:
+            writer.write(f)
+
+    @staticmethod
+    def crop_pdf(file_path: str, output_path: str):
+        reader = PdfReader(file_path)
+        writer = PdfWriter()
+        for page in reader.pages:
+            # Simple crop: reduce margins by 10%
+            mb = page.mediabox
+            page.mediabox.lower_left = (mb.left + 50, mb.bottom + 50)
+            page.mediabox.upper_right = (mb.right - 50, mb.top - 50)
+            writer.add_page(page)
+        with open(output_path, "wb") as f:
+            writer.write(f)
+
+    @staticmethod
+    def word_to_pdf(file_path: str, output_path: str):
+        # Using a mock for conversion if docx2pdf is not available or fails
+        # In a real environment, you'd use a cloud API or LibreOffice
+        try:
+            from docx2pdf import convert
+            convert(file_path, output_path)
+        except Exception as e:
+            # Fallback/Error
+            raise RuntimeError("Word to PDF requires Microsoft Word installed on the server. For cloud deployment, use a LibreOffice-based container.")
+
+    @staticmethod
+    def pdf_to_word(file_path: str, output_path: str):
+        from pdf2docx import Converter
+        cv = Converter(file_path)
+        cv.convert(output_path)
+        cv.close()
+
+    @staticmethod
+    def excel_to_pdf(file_path: str, output_path: str):
+        try:
+            import comtypes.client
+            excel = comtypes.client.CreateObject("Excel.Application")
+            excel.Visible = 0
+            # Open workbook
+            wb = excel.Workbooks.Open(os.path.abspath(file_path))
+            # 5 is the format for PDF in Excel
+            wb.ExportAsFixedFormat(0, os.path.abspath(output_path))
+            wb.Close()
+            excel.Quit()
+        except Exception:
+            # Fallback to pandas/reportlab if Interop fails
+            import pandas as pd
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
+            from reportlab.lib.pagesizes import letter
+            from reportlab.lib import colors
+            
+            df = pd.read_excel(file_path)
+            data = [df.columns.to_list()] + df.values.tolist()
+            
+            doc = SimpleDocTemplate(output_path, pagesize=letter)
+            elements = []
+            t = Table(data)
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            elements.append(t)
+            doc.build(elements)
+
+    @staticmethod
+    def html_to_pdf(file_path: str, output_path: str):
+        from xhtml2pdf import pisa
+        with open(file_path, "r", encoding="utf-8") as f:
+            source_html = f.read()
+        with open(output_path, "wb") as f:
+            pisa.CreatePDF(source_html, dest=f)
 
     @staticmethod
     def repair_pdf(file_path: str, output_path: str):
@@ -307,3 +561,26 @@ class PDFProcessors:
         
         if os.path.exists(sig_file):
             os.remove(sig_file)
+
+    @staticmethod
+    def pdf_to_excel(file_path: str, output_path: str):
+        import pdfplumber
+        import pandas as pd
+        
+        all_tables = []
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                tables = page.extract_tables()
+                for table in tables:
+                    df = pd.DataFrame(table[1:], columns=table[0])
+                    all_tables.append(df)
+        
+        if all_tables:
+            with pd.ExcelWriter(output_path) as writer:
+                for i, df in enumerate(all_tables):
+                    df.to_excel(writer, sheet_name=f'Table_{i+1}', index=False)
+        else:
+            # Fallback if no tables found, just extract text to one cell
+            text = PDFProcessors.extract_text(file_path)
+            df = pd.DataFrame([[text]], columns=['Extracted Content'])
+            df.to_excel(output_path, index=False)

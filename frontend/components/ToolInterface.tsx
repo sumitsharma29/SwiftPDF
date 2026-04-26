@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { useToast } from '@/components/ToastProvider';
 import PDFOrganizer from '@/components/PDFOrganizer';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001';
+const API_BASE = ''; // Use relative paths for Next.js rewrites
 
 interface ToolInterfaceProps {
     tool: string;
@@ -53,6 +53,31 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
         'sign': { title: 'Sign PDF', description: 'Authenticate documents with professional signature overlays.', multiple: false, endpoint: `${API_BASE}/api/process/sign`, color: 'text-purple-400', gradient: 'from-purple-500/20 to-fuchsia-600/20', accent: 'bg-purple-500' },
         'redact': { title: 'Redact PDF', description: 'Permanently obscure sensitive data with absolute certainty.', multiple: false, endpoint: `${API_BASE}/api/process/redact`, color: 'text-rose-400', gradient: 'from-rose-500/20 to-red-600/20', accent: 'bg-rose-500' },
         'compare': { title: 'Compare PDF', description: 'Execute deep structural analysis between two documents.', multiple: true, endpoint: `${API_BASE}/api/process/compare`, color: 'text-indigo-400', gradient: 'from-indigo-500/20 to-violet-600/20', accent: 'bg-indigo-500', isReport: true },
+        'word-to-pdf': { title: 'Word to PDF', description: 'Convert Microsoft Word documents into standardized PDF format.', multiple: false, endpoint: `${API_BASE}/api/process/word-to-pdf`, accept: { 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'], 'application/msword': ['.doc'] }, color: 'text-blue-500', gradient: 'from-blue-500/20 to-blue-700/20', accent: 'bg-blue-500' },
+        'excel-to-pdf': { title: 'Excel to PDF', description: 'Transform spreadsheets into professional PDF reports.', multiple: false, endpoint: `${API_BASE}/api/process/excel-to-pdf`, accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'], 'application/vnd.ms-excel': ['.xls'] }, color: 'text-emerald-500', gradient: 'from-emerald-500/20 to-green-700/20', accent: 'bg-emerald-500' },
+        'pdf-to-excel': { title: 'PDF to Excel', description: 'Extract tabular data from PDF files into editable spreadsheets.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-excel`, color: 'text-emerald-400', gradient: 'from-emerald-400/20 to-green-600/20', accent: 'bg-emerald-400' },
+        'ppt-to-pdf': { title: 'PPT to PDF', description: 'Convert presentation decks into portable PDF documents.', multiple: false, endpoint: `${API_BASE}/api/process/ppt-to-pdf`, accept: { 'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'], 'application/vnd.ms-powerpoint': ['.ppt'] }, color: 'text-orange-500', gradient: 'from-orange-500/20 to-red-700/20', accent: 'bg-orange-500' },
+        'html-to-pdf': { title: 'HTML to PDF', description: 'Render web pages or HTML source code into PDF documents.', multiple: false, endpoint: `${API_BASE}/api/process/html-to-pdf`, accept: { 'text/html': ['.html', '.htm'] }, color: 'text-gray-400', gradient: 'from-gray-500/20 to-gray-700/20', accent: 'bg-gray-500' },
+        'pdf-to-word': { title: 'PDF to Word', description: 'Deconstruct PDF files back into editable Word documents.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-word`, color: 'text-blue-400', gradient: 'from-blue-400/20 to-blue-600/20', accent: 'bg-blue-400' },
+        'remove-pages': { title: 'Remove Pages', description: 'Surgically eliminate unwanted pages from your document.', multiple: false, endpoint: `${API_BASE}/api/process/remove-pages`, color: 'text-red-500', gradient: 'from-red-500/20 to-rose-700/20', accent: 'bg-red-500' },
+        'extract-pages': { title: 'Extract Pages', description: 'Isolate and extract specific page ranges into new assets.', multiple: false, endpoint: `${API_BASE}/api/process/extract-pages`, color: 'text-cyan-400', gradient: 'from-cyan-400/20 to-blue-600/20', accent: 'bg-cyan-400' },
+        'scan-to-pdf': { title: 'Scan to PDF', description: 'Transform physical captures into searchable PDF files.', multiple: true, endpoint: `${API_BASE}/api/process/jpg-to-pdf`, accept: { 'image/*': ['.jpg', '.jpeg', '.png'] }, color: 'text-indigo-400', gradient: 'from-indigo-400/20 to-purple-600/20', accent: 'bg-indigo-400' },
+        'rotate-pdf': { title: 'Rotate PDF', description: 'Correct document orientation with precise rotational control.', multiple: false, endpoint: `${API_BASE}/api/process/rotate-pdf`, color: 'text-yellow-500', gradient: 'from-yellow-500/20 to-orange-600/20', accent: 'bg-yellow-500' },
+        'crop-pdf': { title: 'Crop PDF', description: 'Adjust document margins and crop page boundaries.', multiple: false, endpoint: `${API_BASE}/api/process/crop-pdf`, color: 'text-teal-400', gradient: 'from-teal-400/20 to-emerald-600/20', accent: 'bg-teal-400' },
+        'psd-to-pdf': { title: 'PSD to PDF', description: 'Convert Photoshop documents into standardized PDF assets.', multiple: false, endpoint: `${API_BASE}/api/process/psd-to-pdf`, accept: { 'image/vnd.adobe.photoshop': ['.psd'] }, color: 'text-blue-500', gradient: 'from-blue-600/20 to-indigo-700/20', accent: 'bg-blue-500' },
+        'tiff-to-pdf': { title: 'TIFF to PDF', description: 'Transform multi-page TIFF images into professional PDFs.', multiple: false, endpoint: `${API_BASE}/api/process/tiff-to-pdf`, accept: { 'image/tiff': ['.tiff', '.tif'] }, color: 'text-teal-400', gradient: 'from-teal-500/20 to-cyan-500/20', accent: 'bg-teal-500' },
+        'pdf-to-tiff': { title: 'PDF to TIFF', description: 'Convert PDF documents into high-quality TIFF sequences.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-tiff`, color: 'text-cyan-400', gradient: 'from-cyan-500/20 to-blue-500/20', accent: 'bg-cyan-500' },
+        'json-to-pdf': { title: 'JSON to PDF', description: 'Render structured JSON data into readable PDF reports.', multiple: false, endpoint: `${API_BASE}/api/process/json-to-pdf`, accept: { 'application/json': ['.json'] }, color: 'text-gray-400', gradient: 'from-gray-600/20 to-gray-800/20', accent: 'bg-gray-600' },
+        'xml-to-pdf': { title: 'XML to PDF', description: 'Transform XML structures into standardized PDF documents.', multiple: false, endpoint: `${API_BASE}/api/process/xml-to-pdf`, accept: { 'application/xml': ['.xml'], 'text/xml': ['.xml'] }, color: 'text-gray-500', gradient: 'from-gray-500/20 to-gray-700/20', accent: 'bg-gray-500' },
+        'yaml-to-pdf': { title: 'YAML to PDF', description: 'Convert YAML configuration files into professional PDFs.', multiple: false, endpoint: `${API_BASE}/api/process/yaml-to-pdf`, accept: { 'text/yaml': ['.yaml', '.yml'], 'application/x-yaml': ['.yaml', '.yml'] }, color: 'text-gray-600', gradient: 'from-gray-400/20 to-gray-600/20', accent: 'bg-gray-600' },
+        'pdf-to-json': { title: 'PDF to JSON', description: 'Extract semantic content into machine-readable JSON.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-json`, color: 'text-orange-400', gradient: 'from-orange-500/20 to-yellow-500/20', accent: 'bg-orange-500', isText: true },
+        'pdf-to-xml': { title: 'PDF to XML', description: 'Extract document structure into standardized XML format.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-xml`, color: 'text-orange-500', gradient: 'from-orange-500/20 to-yellow-600/20', accent: 'bg-orange-500', isText: true },
+        'pdf-to-yaml': { title: 'PDF to YAML', description: 'Convert document content into machine-readable YAML files.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-yaml`, color: 'text-orange-600', gradient: 'from-orange-600/20 to-yellow-700/20', accent: 'bg-orange-600', isText: true },
+        'ocr': { title: 'OCR PDF', description: 'Execute local, high-accuracy character recognition.', multiple: false, endpoint: `${API_BASE}/api/process/ocr`, color: 'text-blue-400', gradient: 'from-blue-400/20 to-indigo-600/20', accent: 'bg-blue-400' },
+        'remove-bg': { title: 'Remove BG', description: 'Eliminate backgrounds using local neural processing.', multiple: false, endpoint: `${API_BASE}/api/process/remove-bg`, color: 'text-rose-400', gradient: 'from-rose-400/20 to-red-600/20', accent: 'bg-rose-500' },
+        'pdf-to-pdfa': { title: 'PDF to PDF/A', description: 'Convert documents to ISO standards for long-term archiving.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-pdfa`, color: 'text-emerald-500', gradient: 'from-emerald-500/20 to-teal-600/20', accent: 'bg-emerald-500' },
+        'base64-to-pdf': { title: 'Base64 to PDF', description: 'Decode Base64 strings back into standardized PDF documents.', multiple: false, endpoint: `${API_BASE}/api/process/base64-to-pdf`, color: 'text-gray-400', gradient: 'from-gray-400/20 to-gray-600/20', accent: 'bg-gray-500', isText: true },
+        'pdf-to-base64': { title: 'PDF to Base64', description: 'Encode PDF documents into Base64 strings for easy embedding.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-base64`, color: 'text-gray-500', gradient: 'from-gray-500/20 to-gray-700/20', accent: 'bg-gray-600', isText: true },
     };
 
     const config = toolConfig[tool] || toolConfig.merge;
@@ -79,15 +104,6 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
     };
 
     const handleSubmit = async () => {
-        if (files.length === 0) {
-            addToast('Upload source files to proceed.', 'error');
-            return;
-        }
-        if (tool === 'compare' && files.length !== 2) {
-            addToast('Select two documents for comparison.', 'error');
-            return;
-        }
-
         setLoading(true);
         setError(null);
         setDownloadUrl(null);
@@ -98,8 +114,12 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
         if (tool === 'compare') {
             formData.append('file1', files[0]);
             formData.append('file2', files[1]);
-        } else {
+        } else if (files.length > 0) {
             files.forEach((file) => formData.append(config.multiple ? 'files' : 'file', file));
+        } else if (!config.isBase64) {
+            addToast('Upload source files to proceed.', 'error');
+            setLoading(false);
+            return;
         }
 
         Object.keys(settings).forEach(key => {
@@ -250,6 +270,31 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                                     />
                                 </div>
                             )}
+                            {(tool === 'remove-pages' || tool === 'extract-pages') && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Page Selection (e.g. 1, 3-5)</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cyan-500/50 transition-all font-bold"
+                                        placeholder="1, 3-5"
+                                        onChange={(e) => setSettings({ ...settings, page_range: e.target.value })}
+                                    />
+                                </div>
+                            )}
+                            {tool === 'rotate-pdf' && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Rotation Angle</label>
+                                    <select
+                                        className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cyan-500/50 transition-all font-bold appearance-none"
+                                        onChange={(e) => setSettings({ ...settings, angle: e.target.value })}
+                                        defaultValue="90"
+                                    >
+                                        <option value="90">90° Clockwise</option>
+                                        <option value="180">180° Flip</option>
+                                        <option value="270">270° Counter-Clockwise</option>
+                                    </select>
+                                </div>
+                            )}
                             {tool === 'edit-metadata' && (
                                 <div className="grid gap-4">
                                     {['Title', 'Author', 'Subject', 'Keywords'].map((field) => (
@@ -263,6 +308,31 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                                             />
                                         </div>
                                     ))}
+                                </div>
+                            )}
+                            {config.isBase64 && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Base64 Encoded String</label>
+                                    <textarea
+                                        className="w-full h-32 p-4 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cyan-500/50 transition-all font-mono text-xs resize-none"
+                                        placeholder="Paste your base64 string here..."
+                                        onChange={(e) => setSettings({ ...settings, b64_string: e.target.value })}
+                                    />
+                                </div>
+                            )}
+                            {tool === 'ocr' && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-widest">OCR Language Profile</label>
+                                    <select
+                                        className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-cyan-500/50 transition-all font-bold appearance-none"
+                                        onChange={(e) => setSettings({ ...settings, lang: e.target.value })}
+                                        defaultValue="eng"
+                                    >
+                                        <option value="eng">English (Optimal)</option>
+                                        <option value="hin">Hindi</option>
+                                        <option value="spa">Spanish</option>
+                                        <option value="fra">French</option>
+                                    </select>
                                 </div>
                             )}
                             

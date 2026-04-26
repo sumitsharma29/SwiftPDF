@@ -26,7 +26,18 @@ import {
   GitCompare,
   Sparkles,
   ShieldCheck,
-  Zap
+  Zap,
+  Trash2,
+  ExternalLink,
+  Scan,
+  FileText,
+  Presentation,
+  Table,
+  Languages,
+  Maximize,
+  RotateCw,
+  Crop,
+  FileCode
 } from 'lucide-react';
 
 const tools = [
@@ -141,6 +152,188 @@ const tools = [
     icon: Stamp,
     href: '/tools/watermark',
     color: 'from-pink-500 to-rose-500 text-pink-500',
+  },
+  {
+    title: 'Word to PDF',
+    description: 'Convert Microsoft Word documents into standardized, high-fidelity PDF format instantly.',
+    icon: FileText,
+    href: '/tools/word-to-pdf',
+    color: 'from-blue-600 to-blue-800 text-blue-500',
+  },
+  {
+    title: 'Excel to PDF',
+    description: 'Transform complex spreadsheets into professional PDF reports while maintaining formatting.',
+    icon: Table,
+    href: '/tools/excel-to-pdf',
+    color: 'from-emerald-600 to-green-800 text-emerald-500',
+  },
+  {
+    title: 'PPT to PDF',
+    description: 'Convert presentation decks into portable PDF documents for seamless distribution.',
+    icon: Presentation,
+    href: '/tools/ppt-to-pdf',
+    color: 'from-orange-600 to-red-700 text-orange-500',
+  },
+  {
+    title: 'HTML to PDF',
+    description: 'Render web pages or HTML source code into pixel-perfect PDF documents.',
+    icon: FileCode,
+    href: '/tools/html-to-pdf',
+    color: 'from-gray-700 to-gray-900 text-gray-400',
+  },
+  {
+    title: 'PDF to Word',
+    description: 'Deconstruct PDF files back into editable Microsoft Word documents with AI layout preservation.',
+    icon: FileText,
+    href: '/tools/pdf-to-word',
+    color: 'from-blue-400 to-blue-600 text-blue-400',
+  },
+  {
+    title: 'Remove Pages',
+    description: 'Surgically eliminate unwanted pages from your document with total precision.',
+    icon: Trash2,
+    href: '/tools/remove-pages',
+    color: 'from-red-600 to-rose-800 text-red-500',
+  },
+  {
+    title: 'Extract Pages',
+    description: 'Isolate and extract specific page ranges into new, independent document assets.',
+    icon: ExternalLink,
+    href: '/tools/extract-pages',
+    color: 'from-cyan-400 to-blue-600 text-cyan-400',
+  },
+  {
+    title: 'Scan to PDF',
+    description: 'Transform physical document captures into high-resolution, searchable PDF files.',
+    icon: Scan,
+    href: '/tools/scan-to-pdf',
+    color: 'from-indigo-400 to-purple-600 text-indigo-400',
+  },
+  {
+    title: 'Rotate PDF',
+    description: 'Correct document orientation with precise 90-degree rotational control for every page.',
+    icon: RotateCw,
+    href: '/tools/rotate-pdf',
+    color: 'from-yellow-500 to-orange-600 text-yellow-500',
+  },
+  {
+    title: 'Crop PDF',
+    description: 'Adjust document margins and crop page boundaries with geometric precision.',
+    icon: Crop,
+    href: '/tools/crop-pdf',
+    color: 'from-teal-400 to-emerald-600 text-teal-400',
+  },
+  {
+    title: 'PSD to PDF',
+    description: 'Convert Adobe Photoshop documents into high-fidelity PDF assets locally.',
+    icon: FileCode,
+    href: '/tools/psd-to-pdf',
+    color: 'from-blue-600 to-indigo-700 text-blue-500',
+  },
+  {
+    title: 'TIFF to PDF',
+    description: 'Transform multi-page TIFF images into professional PDF documents.',
+    icon: FileImage,
+    href: '/tools/tiff-to-pdf',
+    color: 'from-teal-500 to-cyan-500 text-teal-500',
+  },
+  {
+    title: 'PDF to TIFF',
+    description: 'Convert PDF documents into high-quality TIFF image sequences.',
+    icon: Image,
+    href: '/tools/pdf-to-tiff',
+    color: 'from-cyan-500 to-blue-500 text-cyan-500',
+  },
+  {
+    title: 'JSON to PDF',
+    description: 'Render structured JSON data into human-readable PDF reports.',
+    icon: FileCode,
+    href: '/tools/json-to-pdf',
+    color: 'from-gray-600 to-gray-800 text-gray-400',
+  },
+  {
+    title: 'Base64 to PDF',
+    description: 'Convert Base64 encoded strings back into standard PDF documents.',
+    icon: FileCode,
+    href: '/tools/base64-to-pdf',
+    color: 'from-gray-400 to-gray-600 text-gray-400',
+  },
+  {
+    title: 'PDF to Base64',
+    description: 'Encode your PDF files into Base64 strings for embedding or transmission.',
+    icon: FileCode,
+    href: '/tools/pdf-to-base64',
+    color: 'from-gray-500 to-gray-700 text-gray-500',
+  },
+  {
+    title: 'XML to PDF',
+    description: 'Transform XML data structures into standardized PDF documentation.',
+    icon: FileCode,
+    href: '/tools/xml-to-pdf',
+    color: 'from-gray-500 to-gray-700 text-gray-500',
+  },
+  {
+    title: 'YAML to PDF',
+    description: 'Convert YAML configuration files into professional PDF layouts.',
+    icon: FileCode,
+    href: '/tools/yaml-to-pdf',
+    color: 'from-gray-400 to-gray-600 text-gray-600',
+  },
+  {
+    title: 'PDF to JSON',
+    description: 'Extract structured content from PDFs into machine-readable JSON format.',
+    icon: FileCode,
+    href: '/tools/pdf-to-json',
+    color: 'from-orange-500 to-yellow-500 text-orange-500',
+  },
+  {
+    title: 'PDF to XML',
+    description: 'Extract document structure into standardized XML format for data interchange.',
+    icon: FileCode,
+    href: '/tools/pdf-to-xml',
+    color: 'from-orange-500 to-yellow-600 text-orange-500',
+  },
+  {
+    title: 'PDF to YAML',
+    description: 'Convert document content into machine-readable YAML configuration files.',
+    icon: FileCode,
+    href: '/tools/pdf-to-yaml',
+    color: 'from-orange-600 to-yellow-700 text-orange-600',
+  },
+  {
+    title: 'PDF to Excel',
+    description: 'Extract tabular data from PDF files into fully editable Excel spreadsheets.',
+    icon: Table,
+    href: '/tools/pdf-to-excel',
+    color: 'from-emerald-400 to-green-600 text-emerald-400',
+  },
+  {
+    title: 'OCR PDF',
+    description: 'Execute local, high-accuracy optical character recognition to make PDFs searchable.',
+    icon: Scan,
+    href: '/tools/ocr',
+    color: 'from-blue-400 to-indigo-600 text-blue-400',
+  },
+  {
+    title: 'Remove BG',
+    description: 'Eliminate document backgrounds using local neural processing for clean outputs.',
+    icon: Eraser,
+    href: '/tools/remove-bg',
+    color: 'from-rose-400 to-red-600 text-rose-400',
+  },
+  {
+    title: 'PDF to PDF/A',
+    description: 'Convert documents to the ISO-standardized version for long-term archiving.',
+    icon: ShieldCheck,
+    href: '/tools/pdf-to-pdfa',
+    color: 'from-emerald-500 to-teal-600 text-emerald-500',
+  },
+  {
+    title: 'Base64 to PDF',
+    description: 'Decode Base64 encoded strings directly into PDF document assets.',
+    icon: Zap,
+    href: '/tools/base64-to-pdf',
+    color: 'from-yellow-400 to-orange-500 text-yellow-400',
   },
 ];
 
@@ -269,14 +462,32 @@ export default function Home() {
 
         <motion.div 
           id="tools"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.05
+              }
+            }
+          }}
           className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
         >
-          <AnimatePresence>
+          <AnimatePresence mode="popLayout">
             {filteredTools.map((tool, index) => (
-              <ToolCard key={tool.href} {...tool} index={index} />
+              <motion.div
+                key={tool.href}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+              >
+                <ToolCard {...tool} index={index} />
+              </motion.div>
             ))}
           </AnimatePresence>
         </motion.div>

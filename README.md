@@ -11,7 +11,7 @@
 **Architecting the future of document intelligence.** 
 *Secure. Private. Instant.*
 
-[Explore Tools](#-intelligence-ecosystem) • [Architecture](#-core-architecture) • [Local Setup](#-installation--deployment) • [About the Author](#-connect-with-me)
+[Explore Tools](#-intelligence-ecosystem) • [Architecture](#-core-architecture) • [Local Setup](#-installation--deployment) • [Prerequisites](#-system-prerequisites)
 
 </div>
 
@@ -28,31 +28,30 @@
 
 ## 🛠 Intelligence Ecosystem
 
-SwiftPDF provides 16 surgical-grade tools categorized for professional workflows:
+SwiftPDF provides **37+ surgical-grade tools** categorized for professional workflows:
 
 ### 📄 Structural Engineering
-- **Merge PDF**: Consolidate multiple documents with structural integrity.
-- **Split PDF**: Deconstruct documents with surgical page extraction.
-- **Organize PDF**: Architect your document flow with reordering and rotation.
-- **Repair PDF**: Restore integrity to damaged or corrupted PDF sources.
+- **Merge & Split**: Consolidate or deconstruct documents with surgical precision.
+- **Organize & Rotate**: Architect document flow with reordering and orientation control.
+- **Extract & Remove Pages**: Isolate specific page ranges or eliminate unwanted assets.
+- **Crop & Repair**: Adjust document margins and restore corrupted sources.
 
 ### 🔐 Security & Compliance
-- **Lock PDF**: Enforce military-grade AES encryption on sensitive data.
-- **Unlock PDF**: Decrypt authorized documents with precision.
-- **Sign PDF**: Authenticate documents with professional signature overlays.
-- **Redact PDF**: Permanently obscure sensitive data with absolute certainty.
+- **Lock & Unlock**: Enforce military-grade AES encryption or decrypt authorized files.
+- **Digital Signatures**: Authenticate documents with professional signature overlays.
+- **Redaction & Watermarking**: Permanently obscure sensitive data or brand your documents.
 
-### ⚙️ Optimization & Conversion
-- **Compress PDF**: Optimize storage via intelligent asset reduction.
-- **PDF to JPG**: Decompose PDF pages into high-fidelity raster assets.
-- **JPG to PDF**: Assemble high-resolution images into standardized PDF format.
-- **Extract Text**: Harvest semantic content using advanced OCR engines.
+### ⚙️ Optimization & Universal Conversion
+- **Office Suite**: Convert between **Word**, **Excel**, **PPT**, and PDF.
+- **Imagery**: Convert **JPG**, **PNG**, **PSD**, **TIFF** to PDF and vice versa.
+- **Data Formats**: Transform **JSON**, **XML**, **YAML**, and **HTML** into standardized PDF reports.
+- **Base64 Encoding**: Encode/Decode PDFs for secure embedding and transmission.
 
-### 📝 Metadata & Indexing
-- **Edit Metadata**: Control internal document properties and indexing.
-- **Page Numbers**: Implement dynamic, sequential indexing protocols.
-- **Watermark PDF**: Brand documents with secure identity markers.
-- **Compare PDFs**: Execute deep structural analysis between documents.
+### 🧠 AI & Advanced Processing
+- **OCR Intelligence**: Execute high-accuracy character recognition (Tesseract).
+- **Background Removal**: Eliminate backgrounds using local neural processing (Rembg).
+- **Comparison Engine**: Execute deep structural analysis between two documents.
+- **PDF/A Archiving**: Convert documents to ISO standards for long-term preservation.
 
 ---
 
@@ -62,45 +61,45 @@ SwiftPDF is built on a distributed "Vanta-Glass" architecture designed for sub-1
 
 - **Frontend**: `Next.js 15+` with `Turbopack`, `Framer Motion` for neural animations, and `Tailwind CSS`.
 - **Backend**: `FastAPI` (Python) serving as a high-concurrency processing core.
-- **PDF Engines**: `PyMuPDF`, `Pikepdf`, and `ReportLab` for pixel-perfect manipulation.
-- **Security**: Magic-byte validation and isolated ephemeral processing loops.
+- **PDF Engines**: `PyMuPDF`, `Pikepdf`, `Pypdf`, and `ReportLab`.
+- **AI Models**: `rembg` (u2net) for background removal and `pytesseract` for OCR.
 
 ---
 
 ## 🚀 Installation & Deployment
 
-### 💻 Local Development Setup
+### 💻 Local Development Setup (Windows)
 
-1. **Clone the Intelligence Suite**
+1. **Clone the Suite**
    ```bash
    git clone https://github.com/sumitsharma29/SwiftPDF.git
    cd SwiftPDF
    ```
 
-2. **Initialize Backend Core**
-   ```bash
-   # Create and activate environment
-   python -m venv .venv_swift
-   source .venv_swift/bin/activate # or .venv_swift\Scripts\activate on Windows
-   
-   # Install processing kernels
-   pip install -r backend/requirements.txt
-   
-   # Deploy local API
-   python -m uvicorn backend.main:app --host 0.0.0.0 --port 8001 --reload
+2. **Start Backend Core**
+   Open a terminal in the root and run:
+   ```powershell
+   .\start_backend_root.bat
    ```
+   *This automatically handles virtual environment creation and dependency installation.*
 
 3. **Initialize Frontend Interface**
+   Open a **second** terminal in the `frontend` directory:
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
 
-### ☁️ Cloud Deployment
+---
 
-The suite is optimized for **Vercel** (Frontend) and **DigitalOcean/Render** (Backend).
-- Ensure `NEXT_PUBLIC_API_URL` is configured to point to your production API endpoint.
+## 📋 System Prerequisites
+
+To unlock the full potential of all tools, ensure the following are installed:
+
+- **OCR PDF**: Requires [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) installed on your system PATH.
+- **Office Tools (Word/Excel/PPT)**: These tools utilize Microsoft Interop on Windows and require MS Office to be installed locally.
+- **Background Removal**: Requires `onnxruntime` (`pip install onnxruntime`). The first run will download a ~170MB AI model.
 
 ---
 
@@ -114,9 +113,6 @@ Built with ❤️ by **Sumit Sharma**. If you find this project useful, consider
   </a>
   <a href="https://github.com/sumitsharma29">
     <img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" />
-  </a>
-  <a href="https://www.instagram.com/sumit__sharma__29">
-    <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" />
   </a>
 </div>
 

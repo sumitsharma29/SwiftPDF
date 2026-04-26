@@ -36,10 +36,12 @@ body::after {
 @layer utilities {
   .glass-panel {
     background: var(--glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     border: 1px solid var(--border);
-    box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.6);
+    box-shadow: 
+      0 4px 24px -1px rgba(0, 0, 0, 0.4),
+      0 0 1px 0 rgba(255, 255, 255, 0.1) inset;
   }
 
   .glass-panel-hover:hover {
@@ -64,15 +66,16 @@ body::after {
     content: "";
     position: absolute;
     inset: -1px;
-    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
     background-size: 200% 100%;
-    animation: beam 4s linear infinite;
+    animation: beam 8s linear infinite;
     z-index: -1;
     border-radius: inherit;
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: exclude;
     -webkit-mask-composite: destination-out;
     padding: 1px;
+    opacity: 0.5;
     will-change: background-position;
   }
 
@@ -82,21 +85,24 @@ body::after {
   }
 
   /* Custom Scrollbar */
+  /* Custom Scrollbar - Ultra Slim & Stealth */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 5px;
+    height: 5px;
   }
 
   ::-webkit-scrollbar-track {
-    background: #050505;
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #1a1a1a;
-    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    transition: background 0.3s;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #333;
+    background: var(--primary);
   }
 }
 

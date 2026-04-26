@@ -44,6 +44,7 @@ async def merge_pdfs(
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/process/split")
+@router.post("/process/extract-pages")
 async def split_pdf(
     file: UploadFile = File(...),
     page_range: str = Form(...),
@@ -411,6 +412,400 @@ async def sign_pdf(
         PDFProcessors.sign_pdf(file_path, output_path, signature_text, folder)
         background_tasks.add_task(safe_rmtree, folder)
         return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/ocr")
+async def ocr_pdf(
+    file: UploadFile = File(...),
+    lang: str = Form("eng"),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = "ocr_result.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.ocr_pdf(file_path, output_path, lang)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/crop-pdf")
+async def crop_pdf(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = "cropped_document.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.crop_pdf(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/remove-bg")
+async def remove_bg(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = "bg_removed.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.remove_bg(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/psd-to-pdf")
+async def psd_to_pdf(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.pdf_from_psd(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/tiff-to-pdf")
+async def tiff_to_pdf(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.pdf_from_images([file_path], output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/pdf-to-tiff")
+async def pdf_to_tiff(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.tiff"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.pdf_to_tiff(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="image/tiff")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/ppt-to-pdf")
+async def ppt_to_pdf(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.pdf_from_pptx(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/pdf-to-pdfa")
+async def pdf_to_pdfa(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}_a.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.pdf_to_pdfa(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/remove-pages")
+async def remove_pages(
+    file: UploadFile = File(...),
+    page_range: str = Form(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = "pages_removed.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.remove_pages(file_path, output_path, page_range)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/rotate-pdf")
+async def rotate_pdf(
+    file: UploadFile = File(...),
+    angle: str = Form("90"),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = "rotated_document.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.rotate_pdf(file_path, output_path, int(angle))
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/pdf-to-word")
+async def pdf_to_word(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.docx"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.pdf_to_word(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/word-to-pdf")
+async def word_to_pdf(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.word_to_pdf(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/excel-to-pdf")
+async def excel_to_pdf(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.excel_to_pdf(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/html-to-pdf")
+async def html_to_pdf(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.html_to_pdf(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/json-to-pdf")
+@router.post("/process/xml-to-pdf")
+@router.post("/process/yaml-to-pdf")
+async def data_to_pdf(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = f.read()
+        PDFProcessors.pdf_from_data(data, "data", output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+# Redefining to handle correctly
+@router.post("/process/pdf-to-json")
+async def pdf_to_json(file: UploadFile = File(...)):
+    return await _handle_pdf_to_data(file, "json")
+
+@router.post("/process/pdf-to-xml")
+async def pdf_to_xml(file: UploadFile = File(...)):
+    return await _handle_pdf_to_data(file, "xml")
+
+@router.post("/process/pdf-to-yaml")
+async def pdf_to_yaml(file: UploadFile = File(...)):
+    return await _handle_pdf_to_data(file, "yaml")
+
+async def _handle_pdf_to_data(file: UploadFile, format_type: str):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        result = PDFProcessors.pdf_to_data(file_path, format_type)
+        safe_rmtree(folder)
+        return {"result": result}
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/base64-to-pdf")
+async def base64_to_pdf(
+    b64_string: str = Form(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = "decoded_document.pdf"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        PDFProcessors.pdf_from_base64(b64_string, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/pdf-to-base64")
+async def pdf_to_base64(
+    file: UploadFile = File(...),
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        import base64
+        with open(file_path, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode('utf-8')
+        
+        safe_rmtree(folder)
+        return {"base64": encoded}
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/pdf-to-excel")
+async def pdf_to_excel(
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = f"{os.path.splitext(file.filename)[0]}.xlsx"
+    output_path = os.path.join(folder, output_filename)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        PDFProcessors.pdf_to_excel(file_path, output_path)
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     except Exception as e:
         safe_rmtree(folder)
         raise HTTPException(status_code=500, detail=str(e))
