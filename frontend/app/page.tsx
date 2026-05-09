@@ -329,11 +329,11 @@ const tools = [
     color: 'from-emerald-500 to-teal-600 text-emerald-500',
   },
   {
-    title: 'Base64 to PDF',
-    description: 'Decode Base64 encoded strings directly into PDF document assets.',
-    icon: Zap,
-    href: '/tools/base64-to-pdf',
-    color: 'from-yellow-400 to-orange-500 text-yellow-400',
+    title: 'Swift Editor',
+    description: 'The ultimate document workspace. Surgically modify content and inject new text layers with absolute visual precision.',
+    icon: Type,
+    href: '/tools/editor',
+    color: 'from-cyan-500 to-blue-600 text-cyan-400',
   },
 ];
 

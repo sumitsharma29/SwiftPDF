@@ -18,6 +18,7 @@ import {
 import Link from 'next/link';
 import { useToast } from '@/components/ToastProvider';
 import PDFOrganizer from '@/components/PDFOrganizer';
+import PDFEditor from '@/components/PDFEditor';
 
 const API_BASE = ''; // Use relative paths for Next.js rewrites
 
@@ -78,6 +79,7 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
         'pdf-to-pdfa': { title: 'PDF to PDF/A', description: 'Convert documents to ISO standards for long-term archiving.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-pdfa`, color: 'text-emerald-500', gradient: 'from-emerald-500/20 to-teal-600/20', accent: 'bg-emerald-500' },
         'base64-to-pdf': { title: 'Base64 to PDF', description: 'Decode Base64 strings back into standardized PDF documents.', multiple: false, endpoint: `${API_BASE}/api/process/base64-to-pdf`, color: 'text-gray-400', gradient: 'from-gray-400/20 to-gray-600/20', accent: 'bg-gray-500', isText: true },
         'pdf-to-base64': { title: 'PDF to Base64', description: 'Encode PDF documents into Base64 strings for easy embedding.', multiple: false, endpoint: `${API_BASE}/api/process/pdf-to-base64`, color: 'text-gray-500', gradient: 'from-gray-500/20 to-gray-700/20', accent: 'bg-gray-600', isText: true },
+        'editor': { title: 'Swift Editor', description: 'Surgically modify document content with visual precision.', multiple: false, endpoint: `${API_BASE}/api/process/edit`, color: 'text-cyan-400', gradient: 'from-cyan-500/20 to-blue-500/20', accent: 'bg-cyan-500' },
     };
 
     const config = toolConfig[tool] || toolConfig.merge;
@@ -142,6 +144,10 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                 let ext = 'pdf';
                 if (contentType === 'application/zip') ext = 'zip';
                 if (contentType === 'image/jpeg') ext = 'jpg';
+                if (contentType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') ext = 'docx';
+                if (contentType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') ext = 'xlsx';
+                if (contentType === 'image/vnd.adobe.photoshop') ext = 'psd';
+                if (contentType === 'image/tiff') ext = 'tiff';
 
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 setDownloadUrl(url);
@@ -163,10 +169,15 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                 };
                 reader.readAsText(err.response.data);
             } else {
-                msg = err.response?.data?.detail || err.message || msg;
-                addToast(msg, 'error');
+                const errorData = err.response?.data?.detail;
+                if (Array.isArray(errorData)) {
+                    msg = errorData.map(e => e.msg).join(', ') || msg;
+                } else {
+                    msg = errorData || err.message || msg;
+                }
+                addToast(String(msg), 'error');
             }
-            setError(msg);
+            setError(String(msg));
         } finally {
             setLoading(false);
         }
@@ -341,17 +352,26 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                             )}
                         </div>
 
-                        <button
-                            onClick={handleSubmit}
-                            disabled={loading || files.length === 0}
-                            className={`
-                                w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3
-                                ${loading ? 'bg-white/5 text-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-cyan-500 hover:text-white shadow-2xl active:scale-[0.98]'}
-                            `}
-                        >
-                            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
-                            {loading ? 'Executing Operation...' : `Initiate ${config.title}`}
-                        </button>
+                        {tool !== 'editor' && (
+                            <button
+                                onClick={handleSubmit}
+                                disabled={loading || files.length === 0}
+                                className={`
+                                    w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] text-xs transition-all flex items-center justify-center gap-3
+                                    ${loading ? 'bg-white/5 text-gray-500 cursor-not-allowed' : 'bg-white text-black hover:bg-cyan-500 hover:text-white shadow-2xl active:scale-[0.98]'}
+                                `}
+                            >
+                                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
+                                {loading ? 'Executing Operation...' : `Initiate ${config.title}`}
+                            </button>
+                        )}
+                        {tool === 'editor' && files.length > 0 && (
+                            <div className="p-6 bg-cyan-500/5 border border-cyan-500/10 rounded-2xl text-center">
+                                <p className="text-[10px] text-cyan-500 font-black uppercase tracking-widest leading-relaxed">
+                                    Architect Mode Active.<br/>Use the visual toolkit below to modify document structure.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </motion.div>
 
@@ -361,7 +381,7 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                     className="lg:col-span-7"
                 >
                     <AnimatePresence mode="wait">
-                        {!downloadUrl && !extractedText && !compareReport && (
+                        {!downloadUrl && !extractedText && !compareReport && !(tool === 'editor' && files.length > 0) && (
                             <motion.div
                                 key="dropzone"
                                 initial={{ opacity: 0, scale: 0.95 }}
@@ -529,6 +549,39 @@ export default function ToolInterface({ tool }: ToolInterfaceProps) {
                                 page_order: order.join(','),
                                 rotation: JSON.stringify(rotation)
                             });
+                        }}
+                    />
+                </div>
+            )}
+
+            {tool === 'editor' && files.length > 0 && !downloadUrl && (
+                <div className="mt-16">
+                    <PDFEditor
+                        file={files[0]}
+                        onSave={async (edits) => {
+                            if (!files[0]) {
+                                addToast('No document loaded for editing.', 'error');
+                                return;
+                            }
+                            setLoading(true);
+                            const formData = new FormData();
+                            formData.append('file', files[0]);
+                            formData.append('edits', JSON.stringify(edits));
+                            
+                            try {
+                                const res = await axios.post('/api/process/edit', formData, {
+                                    responseType: 'blob'
+                                });
+                                const url = window.URL.createObjectURL(new Blob([res.data]));
+                                setDownloadUrl(url);
+                                addToast('Document architected successfully.', 'success');
+                            } catch (err: any) {
+                                console.error('Edit Error:', err);
+                                const errorMsg = err.response?.data?.detail;
+                                addToast(typeof errorMsg === 'string' ? errorMsg : 'Edit commit failed. Please check backend logs.', 'error');
+                            } finally {
+                                setLoading(false);
+                            }
                         }}
                     />
                 </div>

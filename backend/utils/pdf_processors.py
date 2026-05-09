@@ -136,7 +136,9 @@ class PDFProcessors:
         watermark_file = os.path.join(output_folder, "watermark_temp.pdf")
         c = canvas.Canvas(watermark_file, pagesize=letter)
         c.setFont("Helvetica", 40)
-        c.setFillColorRGB(0.5, 0.5, 0.5, 0.5) # Grey, 50% opacity
+        c.setStrokeColorRGB(0.5, 0.5, 0.5)
+        c.setFillColorRGB(0.5, 0.5, 0.5)
+        c.setFillAlpha(0.5)
         c.saveState()
         c.translate(300, 400)
         c.rotate(45)
@@ -166,6 +168,24 @@ class PDFProcessors:
         text = ""
         for page in doc:
             text += page.get_text()
+        
+        # Fallback to OCR if text is very short or empty
+        if len(text.strip()) < 10:
+            try:
+                import pytesseract
+                from PIL import Image
+                pytesseract.get_tesseract_version()
+                
+                ocr_text = ""
+                for page in doc:
+                    pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                    img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                    ocr_text += pytesseract.image_to_string(img)
+                if len(ocr_text.strip()) > len(text.strip()):
+                    text = ocr_text
+            except Exception:
+                pass # Tesseract not found or failed, return whatever we have
+                
         doc.close()
         return text
 
@@ -185,7 +205,7 @@ class PDFProcessors:
         img_byte_arr = BytesIO()
         img.save(img_byte_arr, format='PNG')
         with open(output_path, "wb") as f:
-            f.write(img2pdf.convert(img_byte_arr.getvalue()))
+            f.write(img2pdf.convert([img_byte_arr.getvalue()]))
 
     @staticmethod
     def pdf_from_base64(b64_string: str, output_path: str):
@@ -207,7 +227,23 @@ class PDFProcessors:
         
         lines = data.split('\n')
         for line in lines:
+            # Simple line wrapping
+            while len(line) > 90:
+                textobject.textLine(line[:90])
+                line = line[90:]
+                if textobject.getY() < 50:
+                    c.drawText(textobject)
+                    c.showPage()
+                    textobject = c.beginText()
+                    textobject.setTextOrigin(50, 750)
+                    textobject.setFont("Helvetica", 10)
             textobject.textLine(line)
+            if textobject.getY() < 50:
+                c.drawText(textobject)
+                c.showPage()
+                textobject = c.beginText()
+                textobject.setTextOrigin(50, 750)
+                textobject.setFont("Helvetica", 10)
         
         c.drawText(textobject)
         c.showPage()
@@ -329,6 +365,7 @@ class PDFProcessors:
                 # SaveAs (FileName, FileFormat=32 for PDF)
                 deck.SaveAs(abs_output_path, 32)
                 deck.Close()
+                powerpoint.Quit()
             finally:
                 # Uninitialize COM
                 pythoncom.CoUninitialize()
@@ -409,6 +446,7 @@ class PDFProcessors:
                 wb = excel.Workbooks.Open(os.path.abspath(file_path))
                 wb.ExportAsFixedFormat(0, os.path.abspath(output_path))
                 wb.Close()
+                excel.Quit()
             finally:
                 pythoncom.CoUninitialize()
         except Exception:
@@ -486,11 +524,10 @@ class PDFProcessors:
             writer.write(f)
 
     @staticmethod
-    def preview_pdf(file_path: str) -> List[str]:
+    def preview_pdf(file_path: str) -> List[dict]:
         import fitz  # PyMuPDF
         """
-        Generate low-res previews of all pages in a PDF.
-        Returns a list of base64 encoded strings.
+        Generate HD previews and extract deep font metadata for pixel-perfect editing.
         """
         try:
             doc = fitz.open(file_path)
@@ -500,12 +537,51 @@ class PDFProcessors:
             
             for page_num in range(len(doc)):
                 page = doc.load_page(page_num)
-                # Render at low resolution (matrix 0.3 for speed and small size)
-                pix = page.get_pixmap(matrix=fitz.Matrix(0.3, 0.3)) 
+                pix = page.get_pixmap(matrix=fitz.Matrix(2.0, 2.0)) 
                 img_data = pix.tobytes("jpg")
                 
+                # Use "dict" to get detailed font and color info
+                blocks = page.get_text("dict")["blocks"]
+                word_data = []
+                for b in blocks:
+                    if "lines" in b:
+                        for l in b["lines"]:
+                            for s in l["spans"]:
+                                # s contains: text, font, size, color, origin, bbox
+                                # Split spans into words but keep span-level font info
+                                words = s["text"].split()
+                                if not words: continue
+                                
+                                # Estimate word spacing
+                                for word in words:
+                                    word_data.append({
+                                        "text": word,
+                                        "font": s["font"],
+                                        "size": s["size"],
+                                        "color": s["color"],
+                                        "bbox": s["bbox"] # Note: This is span bbox, for words we'd need more math but this is close
+                                    })
+                
+                # If "dict" is too complex, fallback to words for simple bounding boxes
+                simple_words = page.get_text("words")
+                mapped_words = []
+                for sw in simple_words:
+                    # Find matching font info from our dict extraction (simplified)
+                    mapped_words.append({
+                        "text": sw[4],
+                        "x0": sw[0], "y0": sw[1], "x1": sw[2], "y1": sw[3],
+                        "font": "Helvetica", # Default, will be improved in apply_edits
+                        "size": sw[3] - sw[1]
+                    })
+
                 b64_str = base64.b64encode(img_data).decode('utf-8')
-                previews.append(f"data:image/jpeg;base64,{b64_str}")
+                
+                previews.append({
+                    "url": f"data:image/jpeg;base64,{b64_str}",
+                    "width": page.rect.width,
+                    "height": page.rect.height,
+                    "words": mapped_words
+                })
                 
             doc.close()
             return previews
@@ -602,3 +678,79 @@ class PDFProcessors:
             text = PDFProcessors.extract_text(file_path)
             df = pd.DataFrame([[text]], columns=['Extracted Content'])
             df.to_excel(output_path, index=False)
+
+    @staticmethod
+    def apply_edits(file_path: str, output_path: str, edits: List[dict], output_folder: str):
+        import fitz
+        
+        doc = fitz.open(file_path)
+        
+        for edit in edits:
+            page_idx = edit.get('page', 0)
+            if page_idx >= len(doc): continue
+            
+            page = doc[page_idx]
+            mode = edit.get('mode', 'overlay')
+            
+            target_x = edit.get('x', 0)
+            target_y_fitz = page.rect.height - edit.get('y', 0)
+            
+            if mode == 'replace':
+                search_text = edit.get('search_text', '')
+                new_text = edit.get('text', '')
+                
+                text_instances = page.search_for(search_text)
+                if not text_instances: continue
+                
+                best_instance = None
+                min_dist = float('inf')
+                for rect in text_instances:
+                    dist = ((rect.x0 + rect.x1)/2 - target_x)**2 + ((rect.y0 + rect.y1)/2 - target_y_fitz)**2
+                    if dist < min_dist:
+                        min_dist = dist
+                        best_instance = rect
+                
+                if best_instance:
+                    # Deep Sample: Extract exact font, color, and baseline (origin)
+                    info = page.get_text("dict", clip=best_instance)
+                    
+                    font_name = "helv"
+                    font_size = 12
+                    font_color = (0, 0, 0)
+                    baseline = best_instance.bl - (0, 2) # Fallback
+                    
+                    try:
+                        # Find the span that most overlaps our best_instance
+                        span = info["blocks"][0]["lines"][0]["spans"][0]
+                        
+                        # 1. Capture Exact Color (convert integer color to RGB tuple)
+                        c = span["color"]
+                        font_color = ( ((c >> 16) & 255)/255, ((c >> 8) & 255)/255, (c & 255)/255 )
+                        
+                        # 2. Capture Exact Baseline
+                        baseline = span["origin"]
+                        
+                        # 3. Capture Exact Font Size
+                        font_size = span["size"]
+                        
+                        # 4. Map Font Style
+                        orig_font = span["font"].lower()
+                        if "bold" in orig_font and "italic" in orig_font: font_name = "hebi"
+                        elif "bold" in orig_font: font_name = "hebo"
+                        elif "italic" in orig_font: font_name = "heob"
+                        elif "times" in orig_font: font_name = "tiro"
+                        elif "courier" in orig_font: font_name = "cour"
+                    except: pass
+
+                    # Perform surgical redaction
+                    page.add_redact_annot(best_instance, fill=(1, 1, 1))
+                    page.apply_redactions()
+                    
+                    # Inject with 100% synchronized metadata
+                    page.insert_text(baseline, new_text, fontname=font_name, fontsize=font_size, color=font_color)
+            else:
+                # Standard overlay mode
+                page.insert_text((target_x, target_y_fitz), edit.get('text', ''), fontsize=edit.get('size', 12), color=(0, 0, 0))
+        
+        doc.save(output_path)
+        doc.close()

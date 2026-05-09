@@ -41,6 +41,7 @@ export function generateStaticParams() {
         { tool: 'remove-bg' },
         { tool: 'pdf-to-pdfa' },
         { tool: 'base64-to-pdf' },
+        { tool: 'editor' },
     ];
 }
 
@@ -55,7 +56,7 @@ export default async function ToolPage(props: { params: Promise<{ tool: string }
         'pdf-to-word', 'remove-pages', 'extract-pages', 'scan-to-pdf',
         'rotate-pdf', 'crop-pdf', 'psd-to-pdf', 'tiff-to-pdf', 'pdf-to-tiff',
         'json-to-pdf', 'xml-to-pdf', 'yaml-to-pdf', 'pdf-to-json',
-        'ocr', 'remove-bg', 'pdf-to-pdfa', 'base64-to-pdf'
+        'ocr', 'remove-bg', 'pdf-to-pdfa', 'base64-to-pdf', 'editor'
     ];
 
     if (!allowedTools.includes(params.tool)) {

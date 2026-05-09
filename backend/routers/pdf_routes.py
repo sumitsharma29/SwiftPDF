@@ -6,6 +6,7 @@ import os
 import zipfile
 import json
 from utils.pdf_processors import PDFProcessors
+from utils.ai_processors import ai_processor
 from utils.file_utils import generate_session_id, get_session_folder
 
 router = APIRouter()
@@ -806,6 +807,51 @@ async def pdf_to_excel(
         PDFProcessors.pdf_to_excel(file_path, output_path)
         background_tasks.add_task(safe_rmtree, folder)
         return FileResponse(output_path, filename=output_filename, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+@router.post("/process/preview")
+async def preview_pdf(file: UploadFile = File(...)):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        previews = PDFProcessors.preview_pdf(file_path)
+        safe_rmtree(folder)
+        return {"pages": previews}
+    except Exception as e:
+        safe_rmtree(folder)
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/process/edit")
+async def edit_pdf(
+    file: UploadFile = File(...),
+    edits: str = Form(...), # JSON string of edits: [{"page": 0, "x": 100, "y": 100, "text": "Hello"}]
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+    session_id = generate_session_id()
+    folder = get_session_folder(session_id)
+    output_filename = "edited_document.pdf"
+    output_path = os.path.join(folder, output_filename)
+    
+    try:
+        file_path = os.path.join(folder, file.filename)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        edit_data = json.loads(edits)
+        
+        # We need a new processor method for this
+        PDFProcessors.apply_edits(file_path, output_path, edit_data, folder)
+        
+        background_tasks.add_task(safe_rmtree, folder)
+        return FileResponse(output_path, filename=output_filename, media_type="application/pdf")
     except Exception as e:
         safe_rmtree(folder)
         raise HTTPException(status_code=500, detail=str(e))

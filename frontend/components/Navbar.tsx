@@ -22,10 +22,27 @@ const tools = [
     { name: 'PDF to Excel', href: '/tools/pdf-to-excel', color: 'text-emerald-400' },
     { name: 'Word to PDF', href: '/tools/word-to-pdf', color: 'text-blue-500' },
     { name: 'PDF to Word', href: '/tools/pdf-to-word', color: 'text-blue-400' },
+    { name: 'Excel to PDF', href: '/tools/excel-to-pdf', color: 'text-emerald-500' },
+    { name: 'PPT to PDF', href: '/tools/ppt-to-pdf', color: 'text-orange-500' },
+    { name: 'HTML to PDF', href: '/tools/html-to-pdf', color: 'text-gray-400' },
     { name: 'Remove Pages', href: '/tools/remove-pages', color: 'text-red-500' },
+    { name: 'Extract Pages', href: '/tools/extract-pages', color: 'text-cyan-400' },
     { name: 'Rotate PDF', href: '/tools/rotate-pdf', color: 'text-yellow-500' },
     { name: 'Crop PDF', href: '/tools/crop-pdf', color: 'text-teal-400' },
+    { name: 'Lock PDF', href: '/tools/lock', color: 'text-indigo-500' },
     { name: 'Unlock PDF', href: '/tools/unlock', color: 'text-purple-500' },
+    { name: 'Watermark PDF', href: '/tools/watermark', color: 'text-pink-500' },
+    { name: 'Repair PDF', href: '/tools/repair', color: 'text-emerald-400' },
+    { name: 'Metadata', href: '/tools/edit-metadata', color: 'text-slate-400' },
+    { name: 'Page Numbers', href: '/tools/add-page-numbers', color: 'text-blue-400' },
+    { name: 'PSD to PDF', href: '/tools/psd-to-pdf', color: 'text-blue-500' },
+    { name: 'TIFF to PDF', href: '/tools/tiff-to-pdf', color: 'text-teal-500' },
+    { name: 'PDF to TIFF', href: '/tools/pdf-to-tiff', color: 'text-cyan-500' },
+    { name: 'JSON to PDF', href: '/tools/json-to-pdf', color: 'text-gray-400' },
+    { name: 'Base64/PDF', href: '/tools/base64-to-pdf', color: 'text-gray-500' },
+    { name: 'PDF to JSON', href: '/tools/pdf-to-json', color: 'text-orange-500' },
+    { name: 'PDF to XML', href: '/tools/pdf-to-xml', color: 'text-orange-600' },
+    { name: 'PDF to YAML', href: '/tools/pdf-to-yaml', color: 'text-yellow-600' },
 ];
 
 export default function Navbar() {
@@ -98,7 +115,7 @@ export default function Navbar() {
 
                         <div className="absolute top-full left-1/2 -translate-x-1/2 w-[600px] pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500 transform group-hover:translate-y-0 translate-y-4">
                             <div className="glass-panel rounded-3xl overflow-hidden p-4 shadow-3xl border border-white/10">
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-3 gap-2">
                                     {tools.map((tool) => (
                                         <Link
                                             key={tool.href}

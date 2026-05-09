@@ -27,3 +27,6 @@ psutil>=5.9.8
 comtypes>=1.4.2
 pdfplumber>=0.11.0
 tabula-py>=2.9.0
+huggingface_hub>=0.20.0
+langchain>=0.1.0
+sentence-transformers>=2.2.2
