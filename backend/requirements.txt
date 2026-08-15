@@ -24,6 +24,3 @@ onnxruntime>=1.20.0
 python-pptx>=1.0.2
 psutil>=6.0.0
 pdfplumber>=0.11.0
-huggingface_hub>=0.25.0
-langchain>=0.2.0
-sentence-transformers>=3.0.0

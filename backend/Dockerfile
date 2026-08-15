@@ -1,7 +1,6 @@
 FROM python:3.10-slim
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     poppler-utils \
     libgl1 \
     libglib2.0-0 \
@@ -9,11 +8,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     pkg-config \
     libcairo2-dev \
-    libreoffice \
-    libreoffice-writer \
-    libreoffice-calc \
-    libreoffice-impress \
-    default-jre \
+    libreoffice-nogui \
     fonts-dejavu \
     fonts-liberation \
     && rm -rf /var/lib/apt/lists/*
