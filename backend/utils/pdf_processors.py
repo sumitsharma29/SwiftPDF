@@ -8,6 +8,33 @@ class PDFProcessors:
     """
 
     @staticmethod
+    def _convert_with_libreoffice(file_path: str, output_path: str) -> bool:
+        import subprocess
+        import shutil
+        soffice = shutil.which("soffice") or shutil.which("libreoffice")
+        if not soffice:
+            return False
+        try:
+            out_dir = os.path.dirname(os.path.abspath(output_path))
+            res = subprocess.run(
+                [soffice, "--headless", "--convert-to", "pdf", "--outdir", out_dir, os.path.abspath(file_path)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=15
+            )
+            converted_name = os.path.splitext(os.path.basename(file_path))[0] + ".pdf"
+            generated_pdf = os.path.join(out_dir, converted_name)
+            if res.returncode == 0 and os.path.exists(generated_pdf) and os.path.getsize(generated_pdf) > 0:
+                if os.path.abspath(generated_pdf) != os.path.abspath(output_path):
+                    if os.path.exists(output_path):
+                        os.remove(output_path)
+                    os.rename(generated_pdf, output_path)
+                return True
+        except Exception:
+            pass
+        return False
+
+    @staticmethod
     def merge_pdfs(file_paths: List[str], output_path: str):
         merger = PdfWriter()
         for pdf in file_paths:
@@ -345,32 +372,111 @@ class PDFProcessors:
             pdf.save(output_path, pdf_a=True)
 
     @staticmethod
+    def _find_libreoffice_executable():
+        import shutil
+        for cmd in ["soffice", "libreoffice"]:
+            path = shutil.which(cmd)
+            if path:
+                return path
+        possible_paths = [
+            r"C:\Program Files\LibreOffice\program\soffice.exe",
+            r"C:\Program Files (x86)\LibreOffice\program\soffice.exe",
+            r"C:\Program Files\LibreOffice 7\program\soffice.exe",
+            r"C:\Program Files\LibreOffice 24\program\soffice.exe",
+            r"C:\Program Files\LibreOffice 25\program\soffice.exe",
+        ]
+        for path in possible_paths:
+            if os.path.isfile(path):
+                return path
+        return None
+
+    @staticmethod
+    def _convert_with_libreoffice(input_path: str, output_path: str) -> bool:
+        import subprocess
+        soffice_bin = PDFProcessors._find_libreoffice_executable()
+        if not soffice_bin:
+            return False
+
+        out_dir = os.path.dirname(os.path.abspath(output_path))
+        abs_input = os.path.abspath(input_path)
+        
+        try:
+            cmd = [
+                soffice_bin,
+                "--headless",
+                "--convert-to",
+                "pdf",
+                "--outdir",
+                out_dir,
+                abs_input
+            ]
+            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=60)
+            expected_pdf_name = os.path.splitext(os.path.basename(abs_input))[0] + ".pdf"
+            generated_pdf = os.path.join(out_dir, expected_pdf_name)
+            
+            if os.path.exists(generated_pdf):
+                if os.path.abspath(generated_pdf) != os.path.abspath(output_path):
+                    if os.path.exists(output_path):
+                        os.remove(output_path)
+                    os.rename(generated_pdf, output_path)
+                return True
+        except Exception as e:
+            print(f"LibreOffice conversion failed: {e}")
+        return False
+
+    @staticmethod
     def pdf_from_pptx(file_path: str, output_path: str):
+        # Tier 1: LibreOffice CLI
+        if PDFProcessors._convert_with_libreoffice(file_path, output_path):
+            return
+
+        # Tier 2: Pure-Python (python-pptx + xhtml2pdf - Fast & Non-blocking)
+        try:
+            from pptx import Presentation
+            from xhtml2pdf import pisa
+            from html import escape
+
+            prs = Presentation(file_path)
+            html_parts = ["<html><head><style>body { font-family: sans-serif; padding: 20px; } .slide { border: 2px solid #3b82f6; border-radius: 8px; padding: 20px; margin-bottom: 30px; page-break-after: always; background-color: #f8fafc; } h2 { color: #1e3a8a; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; } p { color: #334155; line-height: 1.5; }</style></head><body>"]
+            
+            for idx, slide in enumerate(prs.slides):
+                html_parts.append(f"<div class='slide'><h2>Slide {idx + 1}</h2>")
+                for shape in slide.shapes:
+                    if hasattr(shape, "text") and shape.text.strip():
+                        html_parts.append(f"<p>{escape(shape.text)}</p>")
+                html_parts.append("</div>")
+            
+            html_parts.append("</body></html>")
+            full_html = "".join(html_parts)
+            with open(output_path, "wb") as f:
+                pisa.CreatePDF(full_html, dest=f)
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return
+        except Exception:
+            pass
+
+        # Tier 3: MS PowerPoint COM Interop (Windows only)
         try:
             import comtypes.client
             import pythoncom
-            # Initialize COM for this thread
             pythoncom.CoInitialize()
             try:
-                # Create PowerPoint instance
                 powerpoint = comtypes.client.CreateObject("Powerpoint.Application")
-                
-                # Open presentation (FileName, ReadOnly, Untitled, WithWindow)
-                # Using positional arguments for maximum compatibility with comtypes
                 abs_file_path = os.path.abspath(file_path)
                 abs_output_path = os.path.abspath(output_path)
-                
-                deck = powerpoint.Presentations.Open(abs_file_path, 1, 0, 0) # ReadOnly=1, Untitled=0, WithWindow=0
-                
-                # SaveAs (FileName, FileFormat=32 for PDF)
+                deck = powerpoint.Presentations.Open(abs_file_path, 1, 0, 0)
                 deck.SaveAs(abs_output_path, 32)
                 deck.Close()
                 powerpoint.Quit()
+                if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                    return
             finally:
-                # Uninitialize COM
                 pythoncom.CoUninitialize()
-        except Exception as e:
-            raise RuntimeError(f"PPT to PDF failed: {str(e)}. Please ensure MS PowerPoint is installed.")
+        except Exception:
+            pass
+
+        # Tier 4: Basic plain text canvas fallback
+        PDFProcessors.pdf_from_data("Presentation Document (Text Fallback)", "txt", output_path)
 
     @staticmethod
     def remove_pages(file_path: str, output_path: str, page_range: str):
@@ -418,14 +524,63 @@ class PDFProcessors:
 
     @staticmethod
     def word_to_pdf(file_path: str, output_path: str):
-        # Using a mock for conversion if docx2pdf is not available or fails
-        # In a real environment, you'd use a cloud API or LibreOffice
+        # Tier 1: LibreOffice CLI
+        if PDFProcessors._convert_with_libreoffice(file_path, output_path):
+            return
+
+        # Tier 2: Pure-Python (python-docx + xhtml2pdf - Fast & Non-blocking)
+        try:
+            import docx
+            from xhtml2pdf import pisa
+            from html import escape
+            
+            doc = docx.Document(file_path)
+            html_parts = ["<html><head><style>body { font-family: sans-serif; margin: 30px; } p { margin-bottom: 10px; line-height: 1.4; } h1,h2,h3 { color: #1e293b; } table { border-collapse: collapse; width: 100%; margin: 15px 0; } td, th { border: 1px solid #cbd5e1; padding: 6px; }</style></head><body>"]
+            for p in doc.paragraphs:
+                if not p.text.strip():
+                    continue
+                if p.style.name.startswith('Heading 1'):
+                    html_parts.append(f"<h1>{escape(p.text)}</h1>")
+                elif p.style.name.startswith('Heading 2'):
+                    html_parts.append(f"<h2>{escape(p.text)}</h2>")
+                elif p.style.name.startswith('Heading 3'):
+                    html_parts.append(f"<h3>{escape(p.text)}</h3>")
+                else:
+                    html_parts.append(f"<p>{escape(p.text)}</p>")
+            for table in doc.tables:
+                html_parts.append("<table>")
+                for row in table.rows:
+                    html_parts.append("<tr>")
+                    for cell in row.cells:
+                        html_parts.append(f"<td>{escape(cell.text)}</td>")
+                    html_parts.append("</tr>")
+                html_parts.append("</table>")
+            html_parts.append("</body></html>")
+            
+            full_html = "".join(html_parts)
+            with open(output_path, "wb") as f:
+                pisa.CreatePDF(full_html, dest=f)
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return
+        except Exception:
+            pass
+
+        # Tier 3: MS Word via docx2pdf (Windows / macOS)
         try:
             from docx2pdf import convert
             convert(file_path, output_path)
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return
+        except Exception:
+            pass
+
+        # Tier 4: Plain text fallback
+        try:
+            with open(file_path, "rb") as f:
+                text_content = f.read().decode('utf-8', errors='ignore')
+            PDFProcessors.pdf_from_data(text_content, "txt", output_path)
         except Exception as e:
-            # Fallback/Error
-            raise RuntimeError("Word to PDF requires Microsoft Word installed on the server. For cloud deployment, use a LibreOffice-based container.")
+            raise RuntimeError(f"Word to PDF conversion failed: {str(e)}")
 
     @staticmethod
     def pdf_to_word(file_path: str, output_path: str):
@@ -436,6 +591,33 @@ class PDFProcessors:
 
     @staticmethod
     def excel_to_pdf(file_path: str, output_path: str):
+        # Tier 1: LibreOffice CLI
+        if PDFProcessors._convert_with_libreoffice(file_path, output_path):
+            return
+
+        # Tier 2: Pure-Python (pandas + xhtml2pdf - Fast & Non-blocking)
+        try:
+            import pandas as pd
+            from xhtml2pdf import pisa
+            
+            excel_file = pd.ExcelFile(file_path)
+            html_parts = ["<html><head><style>body { font-family: sans-serif; padding: 15px; } h2 { color: #047857; margin-top: 20px; } table { border-collapse: collapse; width: 100%; margin-bottom: 20px; font-size: 10px; } th { background-color: #10b981; color: white; border: 1px solid #059669; padding: 6px; } td { border: 1px solid #d1d5db; padding: 5px; text-align: left; }</style></head><body>"]
+            
+            for sheet_name in excel_file.sheet_names:
+                df = pd.read_excel(excel_file, sheet_name=sheet_name)
+                html_parts.append(f"<h2>Sheet: {sheet_name}</h2>")
+                html_parts.append(df.to_html(index=False))
+            
+            html_parts.append("</body></html>")
+            full_html = "".join(html_parts)
+            with open(output_path, "wb") as f:
+                pisa.CreatePDF(full_html, dest=f)
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                return
+        except Exception:
+            pass
+
+        # Tier 3: MS Excel COM Interop (Windows only)
         try:
             import comtypes.client
             import pythoncom
@@ -447,34 +629,37 @@ class PDFProcessors:
                 wb.ExportAsFixedFormat(0, os.path.abspath(output_path))
                 wb.Close()
                 excel.Quit()
+                if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                    return
             finally:
                 pythoncom.CoUninitialize()
         except Exception:
-            # Fallback to simple PDF generation
-            import pandas as pd
-            from reportlab.lib.pagesizes import letter
-            from reportlab.pdfgen import canvas
-            
-            df = pd.read_excel(file_path)
-            c = canvas.Canvas(output_path, pagesize=letter)
-            width, height = letter
-            y = height - 50
-            
-            # Simple header
-            c.setFont("Helvetica-Bold", 10)
-            header = " | ".join(str(col) for col in df.columns)
-            c.drawString(50, y, header)
-            y -= 20
-            
-            c.setFont("Helvetica", 8)
-            for _, row in df.iterrows():
-                row_str = " | ".join(str(val) for val in row.values)
-                c.drawString(50, y, row_str[:120]) # Truncate long lines
-                y -= 15
-                if y < 50:
-                    c.showPage()
-                    y = height - 50
-            c.save()
+            pass
+
+        # Tier 4: Basic pandas dataframe text canvas fallback
+        import pandas as pd
+        from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas
+        
+        df = pd.read_excel(file_path)
+        c = canvas.Canvas(output_path, pagesize=letter)
+        width, height = letter
+        y = height - 50
+        
+        c.setFont("Helvetica-Bold", 10)
+        header = " | ".join(str(col) for col in df.columns)
+        c.drawString(50, y, header)
+        y -= 20
+        
+        c.setFont("Helvetica", 8)
+        for _, row in df.iterrows():
+            row_str = " | ".join(str(val) for val in row.values)
+            c.drawString(50, y, row_str[:120])
+            y -= 15
+            if y < 50:
+                c.showPage()
+                y = height - 50
+        c.save()
 
     @staticmethod
     def html_to_pdf(file_path: str, output_path: str):

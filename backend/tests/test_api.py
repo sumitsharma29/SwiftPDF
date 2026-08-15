@@ -1,9 +1,14 @@
 import os
 import io
+import sys
 import pytest
+
+# Ensure backend root is on sys.path for tests
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from fastapi.testclient import TestClient
 from reportlab.pdfgen import canvas
-from ..main import app
+from main import app
 
 client = TestClient(app)
 
@@ -55,3 +60,55 @@ def test_lock_pdf(dummy_pdf):
     response = client.post("/api/process/lock", files=files, data=data)
     assert response.status_code == 200
     assert response.headers["content-type"] == "application/pdf"
+
+@pytest.fixture
+def dummy_docx():
+    import docx
+    buffer = io.BytesIO()
+    doc = docx.Document()
+    doc.add_heading("Test Document", level=1)
+    doc.add_paragraph("This is a sample paragraph for testing Word to PDF conversion.")
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer.read()
+
+@pytest.fixture
+def dummy_pptx():
+    from pptx import Presentation
+    buffer = io.BytesIO()
+    prs = Presentation()
+    slide = prs.slides.add_slide(prs.slide_layouts[0])
+    title = slide.shapes.title
+    title.text = "Test Presentation"
+    prs.save(buffer)
+    buffer.seek(0)
+    return buffer.read()
+
+@pytest.fixture
+def dummy_xlsx():
+    import pandas as pd
+    buffer = io.BytesIO()
+    df = pd.DataFrame({'Name': ['Alice', 'Bob'], 'Age': [25, 30]})
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Sheet1', index=False)
+    buffer.seek(0)
+    return buffer.read()
+
+def test_word_to_pdf(dummy_docx):
+    files = {'file': ('test.docx', dummy_docx, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')}
+    response = client.post("/api/process/word-to-pdf", files=files)
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+
+def test_ppt_to_pdf(dummy_pptx):
+    files = {'file': ('test.pptx', dummy_pptx, 'application/vnd.openxmlformats-officedocument.presentationml.presentation')}
+    response = client.post("/api/process/ppt-to-pdf", files=files)
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+
+def test_excel_to_pdf(dummy_xlsx):
+    files = {'file': ('test.xlsx', dummy_xlsx, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}
+    response = client.post("/api/process/excel-to-pdf", files=files)
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+
